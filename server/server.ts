@@ -4,6 +4,8 @@ import mysql from "mysql2/promise";
 const app = express();
 const PORT: Number = 3000;
 
+app.use(express.json());
+
 const dbConfig = {
   host: "localhost",
   port: 3307,
@@ -70,6 +72,43 @@ app.get("/articles/level/4", async (req, res) => {
     res.json(results);
   } catch (error) {
     console.error("Error fetching articles with subscription_level 4:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+//*******************POST - Article: **********************//
+app.post("/create-article", async (req, res) => {
+  try {
+    const db = await mysql.createConnection(dbConfig);
+
+    // Hårdkodat exempel.
+    const newArticle = {
+      article_id: 4,
+      title: "Hårdkodat titel",
+      content: "Hårdkodat innehåll",
+      subscription_level: 2,
+      created_at: new Date(),
+    };
+
+    const query = `
+        INSERT INTO articles (article_id, title, content, subscription_level, created_at)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+
+    const values = [
+      newArticle.article_id,
+      newArticle.title,
+      newArticle.content,
+      newArticle.subscription_level,
+      newArticle.created_at,
+    ];
+
+    await db.query(query, values);
+    await db.end();
+
+    res.status(201).send("Article skapd");
+  } catch (error) {
+    console.error("Något gick fel med att skapa article:", error);
     res.status(500).send("Internal Server Error");
   }
 });

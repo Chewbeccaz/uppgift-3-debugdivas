@@ -1,0 +1,12 @@
+GET http://localhost:3000/
+###
+
+GET http://localhost:3000/articles/level/2
+###
+
+GET http://localhost:3000/articles/level/3
+###
+
+
+GET http://localhost:3000/articles/level/4
+###

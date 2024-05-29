@@ -77,38 +77,60 @@ app.get("/articles/level/4", async (req, res) => {
 });
 
 //*******************POST - Article: **********************//
+// app.post("/create-article", async (req, res) => {
+//   try {
+//     const db = await mysql.createConnection(dbConfig);
+
+//     // Hårdkodat exempel.
+//     const newArticle = {
+//       article_id: 4,
+//       title: "Hårdkodat titel",
+//       content: "Hårdkodat innehåll",
+//       subscription_level: 2,
+//       created_at: new Date(),
+//     };
+
+//     const query = `
+//         INSERT INTO articles (article_id, title, content, subscription_level, created_at)
+//         VALUES (?, ?, ?, ?, ?)
+//       `;
+
+//     const values = [
+//       newArticle.article_id,
+//       newArticle.title,
+//       newArticle.content,
+//       newArticle.subscription_level,
+//       newArticle.created_at,
+//     ];
+
+//     await db.query(query, values);
+//     await db.end();
+
+//     res.status(201).send("Article skapd");
+//   } catch (error) {
+//     console.error("Något gick fel med att skapa article:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
 app.post("/create-article", async (req, res) => {
   try {
     const db = await mysql.createConnection(dbConfig);
-
-    // Hårdkodat exempel.
-    const newArticle = {
-      article_id: 4,
-      title: "Hårdkodat titel",
-      content: "Hårdkodat innehåll",
-      subscription_level: 2,
-      created_at: new Date(),
-    };
+    const { title, content, subscription_level } = req.body;
 
     const query = `
-        INSERT INTO articles (article_id, title, content, subscription_level, created_at)
-        VALUES (?, ?, ?, ?, ?)
-      `;
+          INSERT INTO articles (title, content, subscription_level, created_at)
+          VALUES (?, ?, ?, ?)
+        `;
 
-    const values = [
-      newArticle.article_id,
-      newArticle.title,
-      newArticle.content,
-      newArticle.subscription_level,
-      newArticle.created_at,
-    ];
+    const values = [title, content, subscription_level, new Date()];
 
     await db.query(query, values);
     await db.end();
 
-    res.status(201).send("Article skapd");
+    res.status(201).send("Article created successfully");
   } catch (error) {
-    console.error("Något gick fel med att skapa article:", error);
+    console.error("Error creating article:", error);
     res.status(500).send("Internal Server Error");
   }
 });

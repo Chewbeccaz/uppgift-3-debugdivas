@@ -10,15 +10,11 @@ export const Admin = () => {
   const handleCreateArticle = async (article: Article) => {
     try {
       console.log("Adding article:", article);
-      const response = await axios.post(
-        "http://localhost:3000/api/articles/create",
-        article,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post("/api/articles/create", article, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       console.log("Article added:", response.data);
     } catch (error) {

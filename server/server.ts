@@ -2,16 +2,13 @@ import express from "express";
 import articleRoutes from "./routes/articleRoutes";
 import userRoutes from "./routes/userRoutes";
 import mysql from "mysql2/promise";
-import cors from "cors";
 
 const app = express();
 const PORT: Number = 3000;
 
-app.use(cors());
-
 app.use(express.json());
-app.use("/api/articles", articleRoutes);
-app.use("/api/users", userRoutes);
+app.use("/articles", articleRoutes);
+app.use("/users", userRoutes);
 
 // const dbConfig = {
 //   host: "localhost",

@@ -9,7 +9,8 @@ export const Admin = () => {
 
   const handleCreateArticle = async (article: Article) => {
     try {
-      const response = await axios.post("/api/create-article", article, {
+      console.log("Adding article:", article);
+      const response = await axios.post("/api/articles/create", article, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -30,6 +31,7 @@ export const Admin = () => {
       created_at: new Date(),
     };
 
+    console.log(newArticle);
     await handleCreateArticle(newArticle);
     alert("Article created successfully");
     setTitle("");

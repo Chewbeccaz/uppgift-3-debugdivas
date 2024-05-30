@@ -9,11 +9,16 @@ export const Admin = () => {
 
   const handleCreateArticle = async (article: Article) => {
     try {
-      const response = await axios.post("/api/create-article", article, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      console.log("Adding article:", article);
+      const response = await axios.post(
+        "http://localhost:3000/api/articles/create",
+        article,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       console.log("Article added:", response.data);
     } catch (error) {
@@ -30,6 +35,7 @@ export const Admin = () => {
       created_at: new Date(),
     };
 
+    console.log(newArticle);
     await handleCreateArticle(newArticle);
     alert("Article created successfully");
     setTitle("");

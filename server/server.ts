@@ -3,6 +3,7 @@ import articleRoutes from "./routes/articleRoutes";
 import userRoutes from "./routes/userRoutes";
 import mysql from "mysql2/promise";
 import cors from "cors";
+import dbConfig from "./db/config";
 
 const app = express();
 const PORT: Number = 3000;

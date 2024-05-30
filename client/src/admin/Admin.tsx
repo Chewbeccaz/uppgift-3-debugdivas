@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useState } from "react";
 import { Article } from "../models/Article";
+import { Blunder } from "../components/Blunder";
+import { Ariel } from "../components/Ariel";
+import { Triton } from "../components/Triton";
 
 export const Admin = () => {
   const [title, setTitle] = useState("");
@@ -75,6 +78,9 @@ export const Admin = () => {
         </div>
         <button type="submit">Create Article</button>
       </form>
+      <Blunder />
+      <Ariel />
+      <Triton />
     </>
   );
 };

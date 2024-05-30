@@ -34,7 +34,7 @@ const fetchArticlesByLevel = async (subscriptionLevel: number) => {
 };
 
 //*******************GET - Articles Nivå 1: **********************//
-router.get("/articles/level/2", async (req, res) => {
+router.get("/level/2", async (req, res) => {
   try {
     const results = await fetchArticlesByLevel(2);
     res.json(results);
@@ -45,7 +45,7 @@ router.get("/articles/level/2", async (req, res) => {
 });
 
 //*******************GET - Articles Nivå 2: **********************//
-router.get("/articles/level/3", async (req, res) => {
+router.get("/level/3", async (req, res) => {
   try {
     const results = await fetchArticlesByLevel(3);
     res.json(results);
@@ -56,7 +56,7 @@ router.get("/articles/level/3", async (req, res) => {
 });
 
 //*******************GET - Articles Nivå 3: **********************//
-router.get("/articles/level/4", async (req, res) => {
+router.get("/level/4", async (req, res) => {
   try {
     const results = await fetchArticlesByLevel(4);
     res.json(results);

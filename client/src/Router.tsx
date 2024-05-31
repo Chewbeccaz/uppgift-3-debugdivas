@@ -6,6 +6,7 @@ import { Admin } from "./admin/Admin";
 import { Login } from "./components/Login";
 import { Signup } from "./pages/Signup";
 
+
 export const Router = createBrowserRouter([
   {
     path: "/",

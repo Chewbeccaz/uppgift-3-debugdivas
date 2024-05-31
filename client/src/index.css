@@ -1,6 +1,15 @@
+body {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  background-image: url('./src/assets/bakgrundsbild.jpg'); /* Ange den korrekta sökvägen */
+  background-size: cover; /* Skala bilden så att den täcker hela bakgrunden */
+  background-repeat: no-repeat; /* Förhindrar att bilden upprepas */
+
+}
+
 #root {
   margin: 0 auto;
-  /* padding: 2rem; */
   text-align: center;
 }
 
@@ -35,6 +44,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
 
 h1 {
   font-size: 3.2em;

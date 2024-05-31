@@ -21,10 +21,7 @@ router.use(session({
 /******************* POST - Create User: **********************/
 router.post("/create-user", async (req, res) => {
   try {
-    // Hårdkodade värden för testning
-    const email = "hardcoded@example.com";
-    const password = "hardcodedpassword";
-    const subscription_id = 2;
+   const { email, password, subscription_id } = req.body;
 
     const db = await mysql.createConnection(dbConfig);
 

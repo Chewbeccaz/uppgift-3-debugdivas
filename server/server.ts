@@ -3,6 +3,7 @@ import express from "express";
 import articleRoutes from "./routes/articleRoutes";
 import userRoutes from "./routes/userRoutes";
 import "express-session";
+import levelsRoutes from "./routes/levelsRoutes";
 
 
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use("/articles", articleRoutes);
 app.use("/users", userRoutes);
+app.use("/levels", levelsRoutes);
 
 // const dbConfig = {
 //   host: "localhost",

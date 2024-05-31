@@ -15,5 +15,14 @@ GET http://localhost:3000/articles/level/4
 POST http://localhost:3000/create-article
 ###
 
-POST http://localhost:3000/create-user
+POST http://localhost:3000/users/create-user
+Content-Type: application/json
+{
+ "email": "hardcoded@example2.com",
+ "password": "hardcodedpassword2",
+ "subscription_id": 2
+}
+
 ###
+GET http://localhost:3000/levels
+Content-Type: application/json

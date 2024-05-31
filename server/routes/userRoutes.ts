@@ -1,11 +1,22 @@
 import express, { Router } from "express";
 import mysql from "mysql2/promise";
 import dbConfig from "../db/config";
+import session, { Session } from "express-session"; 
+
+
+interface CustomSession extends Session {
+  isLoggedIn?: boolean;
+}
+
 
 const router = Router();
 
 
-
+router.use(session({
+  secret: 'secret', // En hemlig nyckel för att signera sessionen, ändra detta
+  resave: false,
+  saveUninitialized: false
+}));
 
 /******************* POST - Create User: **********************/
 router.post("/create-user", async (req, res) => {
@@ -47,6 +58,7 @@ router.post("/login", async (req, res) => {
       await db.end();
 
       if (results.length > 0) {
+        (req.session as CustomSession).isLoggedIn = true;
           res.status(200).json({ message: "Login successful", user: results[0] });
       } else {
           res.status(401).json({ message: "Invalid email or password" });
@@ -59,11 +71,12 @@ router.post("/login", async (req, res) => {
 
 // Logout route
 router.post("/logout", (req, res) => {
+  // Förstör sessionen för att logga ut användaren
   req.session.destroy((err) => {
       if (err) {
           return res.status(500).send("Logout failed.");
       }
-      res.clearCookie('connect.sid');
+      res.clearCookie('connect.sid'); // Ta bort sessionens cookie
       res.send("Logout successful.");
   });
 });

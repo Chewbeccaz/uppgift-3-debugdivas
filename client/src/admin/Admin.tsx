@@ -4,6 +4,7 @@ import { Article } from "../models/Article";
 import { Blunder } from "../components/Blunder";
 import { Ariel } from "../components/Ariel";
 import { Triton } from "../components/Triton";
+import "../styles/admin.css";
 
 export const Admin = () => {
   const [title, setTitle] = useState("");

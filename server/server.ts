@@ -1,15 +1,19 @@
+
 import express from "express";
 import articleRoutes from "./routes/articleRoutes";
 import userRoutes from "./routes/userRoutes";
-import mysql from "mysql2/promise";
-import cors from "cors";
-import dbConfig from "./db/config";
+import "express-session";
+
+
 
 const app = express();
 const PORT: Number = 3000;
 
-app.use(cors());
+
+
 app.use(express.json());
+
+
 app.use("/articles", articleRoutes);
 app.use("/users", userRoutes);
 
@@ -171,26 +175,27 @@ app.use("/users", userRoutes);
 
 
 //*******************POST - Login: **********************//
-app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
 
-    try {
-        const db = await mysql.createConnection(dbConfig);
-        const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
-        const [results]: [any[], any] = await db.query(query, [email, password]);
+// app.post("/login", async (req, res) => {
+//     const { email, password } = req.body;
 
-        await db.end();
+//     try {
+//         const db = await mysql.createConnection(dbConfig);
+//         const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
+//         const [results]: [any[], any] = await db.query(query, [email, password]);
 
-        if (results.length > 0) {
-            res.status(200).json({ message: "Login successful", user: results[0] });
-        } else {
-            res.status(401).json({ message: "Invalid email or password" });
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).send("Internal Server Error");
-    }
-});
+//         await db.end();
+
+//         if (results.length > 0) {
+//             res.status(200).json({ message: "Login successful", user: results[0] });
+//         } else {
+//             res.status(401).json({ message: "Invalid email or password" });
+//         }
+//     } catch (error) {
+//         console.error("Error during login:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
 
 // Server setup
 app.listen(PORT, () => {

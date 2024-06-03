@@ -1,9 +1,7 @@
 export const PrivacyPolicy = () => (
     <p>
       We need to store and process personal information about you, such as your
-      name, phone number, and email address. The purpose of such processing is to
-      contact you regarding your reservation, for example, if we need to
-      reschedule. <br />
+      name, phone number, and email address.  <br />
       <br />
       The information we have about you is what you provide in connection with the
       booking. We adhere to the current privacy legislation in all processing of

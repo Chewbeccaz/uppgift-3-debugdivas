@@ -71,7 +71,6 @@ export const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      console.log("Login successful");
     } catch (error) {
       console.error("Login failed:", error);
     }

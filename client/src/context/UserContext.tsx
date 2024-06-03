@@ -39,50 +39,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<ILoggedInUser | undefined>(undefined);
 
   //********************************** AUTHORIZE************************************//
-  // const authorize = async () => {
-  //   try {
-  //     const response = await axios.get("/api/users/check-session", {
-  //       withCredentials: true,
-  //     });
-
-  //     if (response.status === 200) {
-  //       if (response.data.isLoggedIn) {
-  //         if (response.data.user) {
-  //           setUser({
-  //             sessionId: response.data.sessionId,
-  //             userId: response.data.user._id,
-  //           });
-  //           // Log only once when authorization is successful
-  //           console.log("Authorization successful:", response.data);
-  //         } else {
-  //           console.error(
-  //             "Authorization failed: 'user' field is missing in the response."
-  //           );
-  //           setUser(undefined);
-  //         }
-  //       } else {
-  //         console.log("Authorization failed or user not logged in");
-  //         setUser(undefined);
-  //       }
-  //     } else {
-  //       console.log("Authorization failed or user not logged in");
-  //       setUser(undefined);
-  //     }
-  //   } catch (error) {
-  //     console.error("Authorization failed:", error);
-  //     setUser(undefined);
-  //   }
-  // };
+  useEffect(() => {
+    console.log("Authorization useEffect körs den?");
+    authorize();
+  }, []);
 
   const authorize = async () => {
     try {
+      console.log("Försöker auktorisera");
       const response = await axios.get("/api/users/check-session", {
         withCredentials: true,
       });
 
       if (response.status === 200 && response.data.isLoggedIn) {
         const { sessionId, user } = response.data;
+        console.log("Response data i auth:", response.data);
         if (user && sessionId) {
+          console.log("Kommer vi in i if-sats?");
           setUser({
             sessionId: sessionId,
             userId: user._id,
@@ -104,6 +77,36 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // const authorize = async () => {
+  //   try {
+  //     const response = await axios.get("/api/users/check-session", {
+  //       withCredentials: true,
+  //     });
+
+  //     if (response.status === 200 && response.data.isLoggedIn) {
+  //       const { sessionId, user } = response.data;
+  //       if (user && sessionId) {
+  //         setUser({
+  //           sessionId: sessionId,
+  //           userId: user._id,
+  //         });
+  //         console.log("Authorization successful:", response.data);
+  //       } else {
+  //         console.error(
+  //           "Authorization failed: Missing 'user' or 'sessionId' in response."
+  //         );
+  //         setUser(undefined);
+  //       }
+  //     } else {
+  //       console.log("Authorization failed or user not logged in");
+  //       setUser(undefined);
+  //     }
+  //   } catch (error) {
+  //     console.error("Authorization failed:", error);
+  //     setUser(undefined);
+  //   }
+  // };
+
   //TODO ***************** LÄGG TILL REGISTRERINGSFUNKTIONEN HÄR*****************//
 
   //TODO ***************** LÄGG TILL LOGIN IN FUNKTION HÄR*****************//
@@ -116,10 +119,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       );
       if (response.status === 200) {
         console.log("Login successful, setting user:", response.data);
-        setUser({
-          sessionId: response.data.sessionId,
-          userId: response.data.user._id,
-        });
+        const { sessionId, user } = response.data;
+        console.log(user);
+        if (user && sessionId) {
+          setUser({
+            sessionId: sessionId,
+            userId: user._id,
+          });
+        }
+      } else {
+        console.error("Login response missing user._id:", response.data);
+        setUser(undefined);
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -136,9 +146,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       console.error("Logout failed:", error);
     }
   };
-  useEffect(() => {
-    authorize();
-  }, []);
+  // useEffect(() => {
+  //   authorize();
+  // }, []);
 
   return (
     <UserContext.Provider value={{ user, setUser, authorize, login, logout }}>

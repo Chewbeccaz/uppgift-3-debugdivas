@@ -5,6 +5,7 @@ import { Home } from "./pages/Home";
 import { Admin } from "./admin/Admin";
 import { Login } from "./components/Login";
 import { Signup } from "./pages/Signup";
+import { MyPage } from "./pages/MyPage";
 
 
 export const Router = createBrowserRouter([
@@ -31,6 +32,11 @@ export const Router = createBrowserRouter([
         {
           path: "/login",
           element: <Login />,
+          errorElement: <NotFound />,
+        },
+        {
+          path: "/mypage",
+          element: <MyPage />,
           errorElement: <NotFound />,
         },
       ],

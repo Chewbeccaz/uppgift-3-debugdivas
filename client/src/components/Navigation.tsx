@@ -81,7 +81,7 @@ export const Navigation = () => {
           {/* BYT UT SIGNUP TILL my_pages */}
           {user ? (
             <li>
-              <NavLink to="/signup">
+              <NavLink to="/mypage">
                 <IoPerson />
               </NavLink>
             </li>

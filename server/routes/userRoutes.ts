@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import mysql from "mysql2/promise";
 import dbConfig from "../db/config";
 import session, { Session } from "express-session";
+import bcrypt from "bcrypt";
 
 interface CustomSession extends Session {
   isLoggedIn?: boolean;
@@ -21,7 +22,10 @@ router.use(
 /******************* POST - Create User: **********************/
 router.post("/create-user", async (req, res) => {
   try {
+    
    const { email, password, subscription_id } = req.body;
+
+   const hashedPassword = await bcrypt.hash(password, 10);
 
     const db = await mysql.createConnection(dbConfig);
 
@@ -30,7 +34,7 @@ router.post("/create-user", async (req, res) => {
         VALUES (?, ?, ?)
       `;
 
-    const values = [email, password, subscription_id];
+    const values = [email, hashedPassword, subscription_id];
 
     await db.query(query, values);
     await db.end();
@@ -54,16 +58,20 @@ router.post("/login", async (req, res) => {
     await db.end();
 
     if (results.length > 0) {
+      const user = results[0];
+      const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (passwordMatch) {
       (req.session as CustomSession).isLoggedIn = true;
       (req.session as CustomSession).userId = results[0].id;
       res.status(200).json({
         message: "Login successful",
-        user: results[0],
+        user,
         sessionId: req.sessionID,
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });
-    }
+    }}
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).send("Internal Server Error");

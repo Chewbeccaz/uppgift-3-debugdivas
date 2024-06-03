@@ -80,7 +80,7 @@ export const Login = () => {
 
   return (
     <>
-      <h1>Login</h1>
+
       <form onSubmit={handleLogin}>
         <label>
           Email:

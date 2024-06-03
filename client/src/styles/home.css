@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Rubik+Bubbles&display=swap');
+
+h2 {
+    font-family: "Bebas Neue";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 6rem;
+    color: hsl(0, 0%, 30%);
+    background: linear-gradient(to right, 
+    hsl(252, 71%, 16%) 0,
+    hsl(249, 6%, 51%) 10%,
+    hsl(252, 71%, 16%) 20%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s infinite linear;
+
+}
+
+@keyframes shine {
+    0% {
+        background-position: 0;
+    }
+    60% {
+        background-position: 800px;
+    }
+    100% {
+        background-position: 1100px;
+    }
+}
+
+h3 {
+    font-family: "Playfair Display", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 4rem;
+    font-style: italic;
+    color: black;
+}
+

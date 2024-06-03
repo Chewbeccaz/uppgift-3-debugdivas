@@ -6,44 +6,67 @@ import { IoPerson } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useUser } from "../context/UserContext";
 
 export const Navigation = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, logout } = useUser();
 
-  //Flytta till en services kanske om behov finns?
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const response = await axios.get("/api/users/check-session", {
-          withCredentials: true,
-        });
-        setIsLoggedIn(response.data.isLoggedIn);
-      } catch (error) {
-        console.error("Session check failed:", error);
-        setIsLoggedIn(false);
-      }
-    };
-
-    checkSession();
-  }, []);
+    console.log("Navigation re-rendered, user:", user);
+  }, [user]);
 
   const handleLoginLogout = async () => {
-    if (isLoggedIn) {
+    if (user) {
       try {
-        await axios.post("/api/users/logout");
-        setIsLoggedIn(false);
-      } catch (error) {
-        console.error("Logout failed:", error);
+        await logout();
+      } catch {
+        console.error("Logout failed:", Error);
       }
     } else {
-      window.location.href = "/login";
+      window.location.href = "/login"; //Byt till Home, eller MyPages sen.
     }
   };
+
+  //Flytta till en services kanske om behov finns?
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     try {
+  //       const response = await axios.get("/api/users/check-session", {
+  //         withCredentials: true,
+  //       });
+  //       setIsLoggedIn(response.data.isLoggedIn);
+  //     } catch (error) {
+  //       console.error("Session check failed:", error);
+  //       setIsLoggedIn(false);
+  //     }
+  //   };
+
+  //   checkSession();
+  // }, []);
+
+  // const handleLoginLogout = async () => {
+  //   if (isLoggedIn) {
+  //     try {
+  //       await axios.post("/api/users/logout");
+  //       setIsLoggedIn(false);
+  //     } catch (error) {
+  //       console.error("Logout failed:", error);
+  //     }
+  //   } else {
+  //     window.location.href = "/login";
+  //   }
+  // };
 
   return (
     <>
       <nav>
         <ul>
+          {user ? (
+            <div style={{ color: "white" }}>Welcome, User {user.userId}</div>
+          ) : (
+            <div style={{ color: "white" }}>Please log in</div>
+          )}
           <li>
             <NavLink to="/">
               <IoHomeOutline />
@@ -51,12 +74,12 @@ export const Navigation = () => {
           </li>
           <li>
             <NavLink to="#" onClick={handleLoginLogout}>
-              {isLoggedIn ? <CiLogout /> : <CiLogin />}
+              {user ? <CiLogout /> : <CiLogin />}
             </NavLink>
           </li>
 
           {/* BYT UT SIGNUP TILL my_pages */}
-          {isLoggedIn ? (
+          {user ? (
             <li>
               <NavLink to="/signup">
                 <IoPerson />

@@ -25,6 +25,7 @@ router.post("/create-user", async (req, res) => {
     
    const { email, password, subscription_id } = req.body;
 
+
    const hashedPassword = await bcrypt.hash(password, 10);
 
     const db = await mysql.createConnection(dbConfig);
@@ -47,6 +48,33 @@ router.post("/create-user", async (req, res) => {
 });
 
 //*******************POST - Login: **********************//
+// router.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     const db = await mysql.createConnection(dbConfig);
+//     const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
+//     const [results]: [any[], any] = await db.query(query, [email, password]);
+
+//     await db.end();
+
+//     if (results.length > 0) {
+//       (req.session as CustomSession).isLoggedIn = true;
+//       (req.session as CustomSession).userId = results[0].id;
+//       res.status(200).json({
+//         message: "Login successful",
+//         user: results[0],
+//         sessionId: req.sessionID,
+//       });
+//     } else {
+//       res.status(401).json({ message: "Invalid email or password" });
+//     }
+//   } catch (error) {
+//     console.error("Error during login:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -66,7 +94,7 @@ router.post("/login", async (req, res) => {
       (req.session as CustomSession).userId = results[0].id;
       res.status(200).json({
         message: "Login successful",
-        user,
+        user: { _id: results[0].id }, // Se till att användar-ID returneras som '_id'
         sessionId: req.sessionID,
       });
     } else {
@@ -78,11 +106,27 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Check session route
+// router.get("/check-session", (req, res) => {
+//   const session = req.session as CustomSession;
+//   if (session && session.isLoggedIn && session.userId) {
+//     res.status(200).json({
+//       isLoggedIn: true,
+//       sessionId: req.sessionID,
+//       user: { id: session.userId },
+//     });
+//   } else {
+//     res.status(200).json({ isLoggedIn: false });
+//   }
+// });
+
 router.get("/check-session", (req, res) => {
   const session = req.session as CustomSession;
-  if (session && session.isLoggedIn) {
-    res.status(200).json({ isLoggedIn: true });
+  if (session && session.isLoggedIn && session.userId) {
+    res.status(200).json({
+      isLoggedIn: true,
+      sessionId: req.sessionID,
+      user: { _id: session.userId }, // Returnera användar-ID som '_id'
+    });
   } else {
     res.status(200).json({ isLoggedIn: false });
   }

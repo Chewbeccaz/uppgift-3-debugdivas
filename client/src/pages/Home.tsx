@@ -9,7 +9,7 @@ export const Home = () => {
   return (
     <>
       <h3>Välkommen till</h3>
-      <h2>fisknytt!</h2>
+      <h2>havsnyheter!</h2>
       <Login />
       <div>
         <motion.img

@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Rubik+Bubbles&display=swap');
+
+  h2 {
+    font-family: "Rubik Bubbles", system-ui;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 6rem;
+    color: rgb(47, 47, 65);
+  }
+  
+  h3{
+        font-family: "Playfair Display", serif;
+        font-optical-sizing: auto;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 4rem;
+        font-style: italic;
+    }
+  
+
+
+#fisk1 {
+    width: 70px;
+
+}
+
+#fisk1 {
+    width: 70px;
+
+}
+

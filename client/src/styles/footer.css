@@ -1,0 +1,22 @@
+.footer-container {
+  background-color: #333;
+
+  opacity: 0.8;
+  padding: 10px 0;
+  text-align: center;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.box1,
+.box2,
+.box3 {
+  border: solid white 1px;
+  color: white;
+  padding: 10px;
+  height: 200px;
+}

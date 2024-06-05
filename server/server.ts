@@ -13,7 +13,7 @@ app.use(express.json());
 app.use("/articles", articleRoutes);
 app.use("/users", userRoutes);
 app.use("/levels", levelsRoutes);
-app.use("/stripe", stripeRoutes);
+// app.use("/stripe", stripeRoutes);
 
 // const dbConfig = {
 //   host: "localhost",

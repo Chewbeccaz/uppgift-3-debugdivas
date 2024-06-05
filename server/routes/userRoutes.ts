@@ -3,11 +3,14 @@ import mysql from "mysql2/promise";
 import dbConfig from "../db/config";
 import session, { Session } from "express-session";
 import bcrypt from "bcrypt";
+import { CustomSession } from "../models/CustomSession";
+import { initStripe } from "../stripe";
+// const initStripe = require("../stripe");
 
-interface CustomSession extends Session {
-  isLoggedIn?: boolean;
-  userId?: number;
-}
+// interface CustomSession extends Session {
+//   isLoggedIn?: boolean;
+//   userId?: number;
+// }
 
 const router = Router();
 
@@ -19,27 +22,82 @@ router.use(
   })
 );
 
+// /******************* POST - Create User OLD: **********************/
+// router.post("/create-user", async (req, res) => {
+//   try {
+//     const { email, password, subscription_id } = req.body;
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const db = await mysql.createConnection(dbConfig);
+
+//     const query = `
+//         INSERT INTO users (email, password, subscription_id)
+//         VALUES (?, ?, ?)
+//       `;
+
+//     const values = [email, hashedPassword, subscription_id];
+
+//     await db.query(query, values);
+//     await db.end();
+
+//     res.status(201).send("User created");
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
 /******************* POST - Create User: **********************/
 router.post("/create-user", async (req, res) => {
+  const stripe = initStripe();
+  const connection = await mysql.createConnection(dbConfig);
+  await connection.beginTransaction();
   try {
     const { email, password, subscription_id } = req.body;
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const db = await mysql.createConnection(dbConfig);
+    const userQuery = `
+    INSERT INTO users (email, password, subscription_id)
+    VALUES (?, ?, ?)
+  `;
 
-    const query = `
-        INSERT INTO users (email, password, subscription_id)
-        VALUES (?, ?, ?)
-      `;
+    const userValues = [email, hashedPassword, subscription_id];
+    const [result]: any = await connection.query(userQuery, userValues);
+    const userId = result.insertId;
 
-    const values = [email, hashedPassword, subscription_id];
+    // Fetch subscription level
+    const subQuery = `SELECT price FROM subscription_level WHERE _id = ?`;
+    const [subResult]: any = await connection.query(subQuery, [
+      subscription_id,
+    ]);
+    const price = subResult[0].price;
 
-    await db.query(query, values);
-    await db.end();
+    // Create Stripe subscription session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      customer_email: email,
+      line_items: [
+        {
+          price: price,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: "http://localhost:5173/", //lägg till confirmation sen
+      cancel_url: "http://localhost:5173/",
+      metadata: {
+        userId: userId,
+      },
+    });
 
-    res.status(201).send("User created");
+    await connection.commit();
+    await connection.end();
+
+    res.status(201).json({ message: "User created", sessionId: session.id });
   } catch (error) {
+    await connection.rollback();
+    await connection.end();
     console.error("Error creating user:", error);
     res.status(500).send("Internal Server Error");
   }

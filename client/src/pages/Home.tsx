@@ -34,7 +34,7 @@ useEffect(() => {
       <h3>Välkommen till</h3>
       <h2>havsnyheter!</h2>
 
-      <div>
+      <div style={{ overflow:"hidden"}}>
         <motion.img
           src={fisk}
           id="fisk1"

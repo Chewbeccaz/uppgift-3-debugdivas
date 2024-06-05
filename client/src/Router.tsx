@@ -6,6 +6,8 @@ import { Admin } from "./admin/Admin";
 import { Login } from "./components/Login";
 import { Signup } from "./pages/Signup";
 import { MyPage } from "./pages/MyPage";
+import { Confirmation } from "./pages/Confirmation";
+
 
 
 export const Router = createBrowserRouter([
@@ -39,6 +41,11 @@ export const Router = createBrowserRouter([
           element: <MyPage />,
           errorElement: <NotFound />,
         },
+        {
+          path: "/confirmation",
+          element: <Confirmation />,
+          errorElement: <NotFound />,
+        }
       ],
     },
    ]);

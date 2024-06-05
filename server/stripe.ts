@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import dotenv from "dotenv";
+dotenv.config();
 
 export const initStripe = (): Stripe => {
   const apiKey = process.env.STRIPE_KEY;

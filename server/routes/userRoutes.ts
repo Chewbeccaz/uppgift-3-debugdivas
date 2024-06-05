@@ -67,11 +67,11 @@ router.post("/create-user", async (req, res) => {
     const userId = result.insertId;
 
     // Fetch subscription level
-    const subQuery = `SELECT price FROM subscription_level WHERE _id = ?`;
+    const subQuery = `SELECT price_id FROM subscription_level WHERE _id = ?`;
     const [subResult]: any = await connection.query(subQuery, [
       subscription_id,
     ]);
-    const price = subResult[0].price;
+    const priceId = subResult[0].price_id;
 
     // Create Stripe subscription session
     const session = await stripe.checkout.sessions.create({
@@ -79,7 +79,7 @@ router.post("/create-user", async (req, res) => {
       customer_email: email,
       line_items: [
         {
-          price: price,
+          price: priceId,
           quantity: 1,
         },
       ],

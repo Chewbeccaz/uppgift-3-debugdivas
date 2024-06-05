@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     const db = await mysql.createConnection(dbConfig);
     const query = `SELECT _id, name FROM subscription_level`;
     const [results]: [any[], any] = await db.query(query);
-    await db.end();
+    // await db.end();
 
     res.status(200).json(results);
   } catch (error) {

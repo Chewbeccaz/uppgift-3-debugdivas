@@ -28,7 +28,7 @@ const fetchArticlesByLevel = async (subscriptionLevel: number) => {
     "SELECT * FROM `articles` WHERE `subscription_level` = ?",
     [subscriptionLevel]
   );
-  await db.end();
+  // await db.end();
   console.log(results);
   return results;
 };
@@ -81,7 +81,7 @@ router.post("/create", async (req, res) => {
     const values = [title, content, subscription_level, new Date()];
 
     await db.query(query, values);
-    await db.end();
+    // await db.end();
 
     res.status(201).send("Article created successfully");
   } catch (error) {

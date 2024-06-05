@@ -1,23 +1,19 @@
-
 import express from "express";
 import articleRoutes from "./routes/articleRoutes";
 import userRoutes from "./routes/userRoutes";
 import "express-session";
 import levelsRoutes from "./routes/levelsRoutes";
-
-
+import stripeRoutes from "./routes/stripeRoutes";
 
 const app = express();
 const PORT: Number = 3000;
 
-
-
 app.use(express.json());
-
 
 app.use("/articles", articleRoutes);
 app.use("/users", userRoutes);
 app.use("/levels", levelsRoutes);
+app.use("/stripe", stripeRoutes);
 
 // const dbConfig = {
 //   host: "localhost",
@@ -174,7 +170,6 @@ app.use("/levels", levelsRoutes);
 //     res.status(500).send("Internal Server Error");
 //   }
 // });
-
 
 //*******************POST - Login: **********************//
 

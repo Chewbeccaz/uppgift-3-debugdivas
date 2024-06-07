@@ -13,6 +13,7 @@ export const Signup = () => {
   const [message, setMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null); //Borde detta ligga som ett globalt state i context?
 
   useEffect(() => {
     const fetchSubscriptions = async () => {
@@ -44,6 +45,8 @@ export const Signup = () => {
 
       if (response.status === 201) {
         setMessage("Konto skapat!");
+        const userId = response.data.userId; 
+        setUserId(userId);
       } else {
         setMessage("Något gick fel, vänligen försök igen.");
       }
@@ -53,13 +56,30 @@ export const Signup = () => {
     }
   };
 
+  // const handleSubPayment = async () => {
+  //   try {
+  //     const response = await axios.post(
+  //       "/api/stripe/create-subscription-session"
+  //     );
+  //     const { url } = response.data;
+  //     window.location.href = url;
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
+
   const handleSubPayment = async () => {
+    if (userId === null) {
+      alert("skapa ett konto först")
+      return; 
+    }
     try {
-      const response = await axios.post(
-        "/api/stripe/create-subscription-session"
-      );
-      const { url } = response.data;
-      window.location.href = url;
+      const response = await axios.post("/api/stripe/create-subscription-session", {
+        userId: userId
+      });
+      const { url, session } = response.data; 
+      window.location.href = url; 
+      console.log(session);
     } catch (e) {
       console.error(e);
     }

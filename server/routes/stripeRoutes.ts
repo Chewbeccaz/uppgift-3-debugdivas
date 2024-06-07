@@ -22,6 +22,8 @@ const stripe = initStripe();
 // };
 
 router.post("/create-subscription-session", async (req, res) => {
+  const { userId } = req.body; 
+  console.log (userId);
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -36,9 +38,11 @@ router.post("/create-subscription-session", async (req, res) => {
       cancel_url: "http://localhost:5173/",
     });
 
-    console.log("session: ", session.id, session.url, session);
+    console.log("session: ", session.id, session.url);
     const sessionId = session.id;
-    const user_id = 11;
+    const user_id = userId; 
+    console.log("user_id", user_id);
+    
 
     console.log("sessionId: ", sessionId);
 
@@ -53,7 +57,9 @@ router.post("/create-subscription-session", async (req, res) => {
      await db.query(query, values);
     
 
-    res.json({ url: session.url });
+    res.json({ url: session.url, session });
+    console.log("session är klar? ", session);
+
   } catch {
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -80,6 +86,11 @@ router.get("/verify-subscription-session", async (req, res) => {
     console.error("Error verifying subscription session:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+router.post("/webhook", async(req, res) => {
+  console.log(req.body)
+    res.json({});
 });
 
 

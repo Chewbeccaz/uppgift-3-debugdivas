@@ -38,10 +38,12 @@ router.post("/create-user", async (req, res) => {
 
     const values = [email, hashedPassword, subscription_id];
 
-    await db.query(query, values);
+    const [result] = await db.query<mysql.ResultSetHeader>(query, values);
+    const userId = result.insertId;
     // await db.end();
 
-    res.status(201).send("User created");
+    // res.status(201).send("User created");
+    res.status(201).json({ message: "User created", userId: userId });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).send("Internal Server Error");

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import mysql from "mysql2/promise";
+import { RowDataPacket } from "mysql2";
 import dbConfig from "../db/config";
 import { initStripe } from "../stripe";
 import dotenv from "dotenv";
@@ -22,8 +23,8 @@ const stripe = initStripe();
 // };
 
 router.post("/create-subscription-session", async (req, res) => {
-  const { userId } = req.body; 
-  console.log (userId);
+  const { userId } = req.body;
+  console.log(userId);
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -40,47 +41,81 @@ router.post("/create-subscription-session", async (req, res) => {
 
     console.log("session: ", session.id, session.url);
     const sessionId = session.id;
-    const user_id = userId; 
+    const user_id = userId;
     console.log("user_id", user_id);
-    
 
     console.log("sessionId: ", sessionId);
 
-     // Spara sessionsid till databasen
-     const db = await mysql.createConnection(dbConfig);
-     const query = `
+    // Spara sessionsid till databasen
+    const db = await mysql.createConnection(dbConfig);
+    const query = `
        INSERT INTO payments (stripe_session_id, user_id, payment_date)
        VALUES (?, ?, ?)
      `;
-     const values = [sessionId, user_id, new Date()];
- 
-     await db.query(query, values);
-    
+    const values = [sessionId, user_id, new Date()];
 
-    res.json({ url: session.url, session });
+    await db.query(query, values);
+
+    res.json({ url: session.url, session, user_id });
     console.log("session är klar? ", session);
-
   } catch {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 //SKAPA EN VERIFY SESSION.
-router.get("/verify-subscription-session", async (req, res) => {
-  const sessionId = req.query.sessionId as string;
+// router.get("/verify-subscription-session", async (req, res) => {
+//   const sessionId = req.query.sessionId as string;
 
-  if (!sessionId) {
-    return res.status(400).json({ error: "sessionId is required" });
+//   if (!sessionId) {
+//     return res.status(400).json({ error: "sessionId is required" });
+//   }
+
+//   try {
+//     const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+//     if (session.payment_status === "paid") {
+//       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
+//       return res
+//         .status(200)
+//         .json({ verified: true, lineItems: lineItems.data });
+//     } else {
+//       return res.status(200).json({ verified: false });
+//     }
+//   } catch (error) {
+//     console.error("Error verifying subscription session:", error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+router.get("/verify-subscription-session", async (req, res) => {
+  const userId = req.query.userId as string;
+
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
   }
 
   try {
+    const db = await mysql.createConnection(dbConfig);
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT stripe_session_id FROM payments WHERE user_id = ?",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const sessionId = rows[0].stripe_session_id;
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status === "paid") {
       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-      return res.status(200).json({ verified: true, lineItems: lineItems.data });
+      return res
+        .status(200)
+        .json({ verified: true, lineItems: lineItems.data, session });
     } else {
-      return res.status(200).json({ verified: false });
+      return res.status(200).json({ verified: false, session });
     }
   } catch (error) {
     console.error("Error verifying subscription session:", error);
@@ -88,16 +123,14 @@ router.get("/verify-subscription-session", async (req, res) => {
   }
 });
 
-router.post("/webhook", async(req, res) => {
-  console.log(req.body)
-    res.json({});
+router.post("/webhook", async (req, res) => {
+  console.log(req.body);
+  res.json({});
 });
-
-
 
 // router.get("/verify-subscription-session", async (req, res) => {
 //   try {
-  
+
 //     const sessionIdParam = req.query.sessionId;
 
 //     if (!sessionIdParam) {
@@ -133,9 +166,6 @@ router.post("/webhook", async(req, res) => {
 //     res.status(500).json({ error: "Internal Server Error" });
 //   }
 // });
-
-
-
 
 //Denna ska kunna återbrukas när tillexempel betalning ej gått igenom och man vill förnya.
 // const createSubscriptionSession = async (req: Request, res: Response) => {

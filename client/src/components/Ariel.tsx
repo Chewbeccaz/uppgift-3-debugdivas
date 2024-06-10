@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Article } from "../models/Article";
 import axios from "axios";
+import { GiSeaTurtle } from "react-icons/gi";
 
 export const Ariel = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -32,8 +33,8 @@ export const Ariel = () => {
 
   return (
     <div>
-      <h1>Level 2: Ariels Antikviteter</h1>
-      <p>Här kommer alla innehållsartiklar mappas ut i denna kategori. </p>
+      <h1>Ariels Antikviteter 
+        <br /><GiSeaTurtle /><GiSeaTurtle /></h1>
       {articles.map((article) => (
         <div key={article.article_id}>
           <h2>{article.title}</h2>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Article } from "../models/Article";
 import axios from "axios";
+import { GiSeaTurtle } from "react-icons/gi";
 
 export const Blunder = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -32,8 +33,8 @@ export const Blunder = () => {
 
   return (
     <div>
-      <h1>Level 1: Blunders Bubblor</h1>
-      <p>Här Är alla nyhetsartiklar i Blunders bubblor: </p>
+      <h1>Blunders Bubblor 
+        <br /><GiSeaTurtle /></h1>
       {articles.map((article) => (
         <div key={article.article_id}>
           <h2>{article.title}</h2>

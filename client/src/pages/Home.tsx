@@ -33,7 +33,7 @@ useEffect(() => {
   return (
     <>
       <h3>Välkommen till</h3>
-      <h2>havsnyheter!</h2>
+      <h2 id="title">havsnyheter!</h2>
 
         <SubLevel />
       <div style={{ overflow:"hidden"}}>

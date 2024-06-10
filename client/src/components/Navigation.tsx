@@ -4,8 +4,7 @@ import { IoHomeOutline } from "react-icons/io5";
 import { IoMdPersonAdd } from "react-icons/io";
 import { IoPerson } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect } from "react";
 import { useUser } from "../context/UserContext";
 
 export const Navigation = () => {

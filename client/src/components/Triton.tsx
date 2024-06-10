@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Article } from "../models/Article";
 import axios from "axios";
+import { GiSeaTurtle } from "react-icons/gi";
+
 
 export const Triton = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -32,8 +34,9 @@ export const Triton = () => {
 
   return (
     <div>
-      <h1>Level 3: Tritons treudd</h1>
-      <p>Här kommer alla innehållsartiklar mappas ut i denna kategori. </p>
+      <h1>Tritons treudd
+        <br /><GiSeaTurtle /><GiSeaTurtle /><GiSeaTurtle />
+      </h1>
       {articles.map((article) => (
         <div key={article.article_id}>
           <h2>{article.title}</h2>

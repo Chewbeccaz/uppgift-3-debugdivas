@@ -1,23 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext";
 import { Blunder } from "../components/Blunder";
 import { Ariel } from "../components/Ariel";
 import { Triton } from "../components/Triton";
+import axios from "axios";
+import { NoAccess } from "./NoAccess";
+
 
 export const SubLevel = () => {
   const { user } = useUser();
+  const [subscriptionLevel, setSubscriptionLevel] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchSubscriptionLevel = async () => {
+      if (user) {
+        try {
+          const response = await axios.get(`/api/users/subscription/${user.userId}`);
+          setSubscriptionLevel(response.data.subscriptionId);
+        } catch (error) {
+          console.error("Failed to fetch subscription level:", error);
+        }
+      }
+    };
+
+    fetchSubscriptionLevel();
+  }, [user]);
 
   // Dummydata för prenumerationsnivån - ersätt med användarens verkliga prenumerationsnivå
-  const subscriptionLevel = user ? user.subscriptionLevel : null;
+  // const subscriptionLevel = user ? user.subscriptionLevel : null;
 
   return (
-    <div>
-      <h1>SubLevel</h1>
-      {subscriptionLevel === 2 && <Blunder />}
-      {subscriptionLevel === 3 && <Ariel />}
-      {subscriptionLevel === 4 && <Triton />}
-    </div>
+    <>
+      <div>
+        <h1>SubLevel</h1>
+        {subscriptionLevel === 1 && <NoAccess />}
+        {subscriptionLevel === 2 && <Blunder />}
+        {subscriptionLevel === 3 && (
+          <>
+            <Blunder />
+            <Ariel />
+          </>
+        )}
+        {subscriptionLevel === 4 && (
+          <>
+            <Blunder />
+            <Ariel />
+            <Triton />
+          </>
+        )}
+      </div>
+    </>
   );
+
 };
 
 

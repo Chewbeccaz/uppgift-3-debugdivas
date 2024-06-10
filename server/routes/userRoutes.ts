@@ -5,12 +5,8 @@ import session, { Session } from "express-session";
 import bcrypt from "bcrypt";
 import { CustomSession } from "../models/CustomSession";
 import { initStripe } from "../stripe";
-// const initStripe = require("../stripe");
+import { RowDataPacket } from "mysql2/promise";
 
-// interface CustomSession extends Session {
-//   isLoggedIn?: boolean;
-//   userId?: number;
-// }
 
 const router = Router();
 
@@ -50,6 +46,32 @@ router.post("/create-user", async (req, res) => {
   }
 });
 
+
+//****************************** GET USERS SUBSCRIPTION ************************************/
+router.get('/subscription/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const db = await mysql.createConnection(dbConfig);
+
+    const [rows] = await db.query<RowDataPacket[]>(
+      'SELECT subscription_id FROM users WHERE _id = ?',
+      [userId]
+    );
+
+    if (rows.length > 0) {
+      res.json({ subscriptionId: rows[0].subscription_id });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+
+    await db.end();
+  } catch (error) {
+    console.error('Database query failed:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 /******************* delete  - CANCEL SUB: **********************/
   //Just nu gör inte endpointen så mycket, då det är osäkert hur vi ska göra med databasen och stripe/webhook. Detta är bara en start 
   
@@ -69,120 +91,6 @@ router.delete("/cancel-subscription", async (req, res) => {
   }
 });
 
-/******************* POST - Create User: **********************/
-// router.post("/create-user", async (req, res) => {
-//   const stripe = initStripe();
-//   const connection = await mysql.createConnection(dbConfig);
-//   await connection.beginTransaction();
-//   try {
-//     const { email, password, subscription_id } = req.body;
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const userQuery = `
-//     INSERT INTO users (email, password, subscription_id)
-//     VALUES (?, ?, ?)
-//   `;
-
-//     const userValues = [email, hashedPassword, subscription_id];
-//     const [result]: any = await connection.query(userQuery, userValues);
-//     const userId = result.insertId;
-
-//     // Fetch subscription level
-//     const subQuery = `SELECT price_id FROM subscription_level WHERE _id = ?`;
-//     const [subResult]: any = await connection.query(subQuery, [
-//       subscription_id,
-//     ]);
-//     const priceId = subResult[0].price_id;
-
-//     // Create Stripe subscription session
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ["card"],
-//       customer_email: email,
-//       line_items: [
-//         {
-//           price: priceId,
-//           quantity: 1,
-//         },
-//       ],
-//       mode: "subscription",
-//       success_url: "http://localhost:5173/", //lägg till confirmation sen
-//       cancel_url: "http://localhost:5173/",
-//       metadata: {
-//         userId: userId,
-//       },
-//     });
-
-//     await connection.commit();
-//     await connection.end();
-
-//     res.status(201).json({ message: "User created", sessionId: session.id });
-//   } catch (error) {
-//     await connection.rollback();
-//     await connection.end();
-//     console.error("Error creating user:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
-
-//*******************POST - Login: **********************//
-// router.post("/login", async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const db = await mysql.createConnection(dbConfig);
-//     const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
-//     const [results]: [any[], any] = await db.query(query, [email, password]);
-
-//     await db.end();
-
-//     if (results.length > 0) {
-//       (req.session as CustomSession).isLoggedIn = true;
-//       (req.session as CustomSession).userId = results[0].id;
-//       res.status(200).json({
-//         message: "Login successful",
-//         user: results[0],
-//         sessionId: req.sessionID,
-//       });
-//     } else {
-//       res.status(401).json({ message: "Invalid email or password" });
-//     }
-//   } catch (error) {
-//     console.error("Error during login:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
-
-// router.post("/login", async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const db = await mysql.createConnection(dbConfig);
-//     const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
-//     const [results]: [any[], any] = await db.query(query, [email, password]);
-
-//     await db.end();
-
-//     if (results.length > 0) {
-//       const user = results[0];
-//       const passwordMatch = await bcrypt.compare(password, user.password);
-
-//       if (passwordMatch) {
-//         (req.session as CustomSession).isLoggedIn = true;
-//         (req.session as CustomSession).userId = results[0].id;
-//         res.status(200).json({
-//           message: "Login successful",
-//           user: { _id: results[0].id }, // Se till att användar-ID returneras som '_id'
-//           sessionId: req.sessionID,
-//         });
-//       } else {
-//         res.status(401).json({ message: "Invalid email or password" });
-//       }
-//     }
-//   } catch (error) {
-//     console.error("Error during login:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -240,18 +148,7 @@ router.get("/check-session", (req, res) => {
   }
 });
 
-// router.get("/check-session", (req, res) => {
-//   const session = req.session as CustomSession;
-//   if (session && session.isLoggedIn && session.userId) {
-//     res.status(200).json({
-//       isLoggedIn: true,
-//       sessionId: req.sessionID,
-//       user: { _id: session.userId }, // Returnera användar-ID som '_id'
-//     });
-//   } else {
-//     res.status(200).json({ isLoggedIn: false });
-//   }
-// });
+
 
 // Logout route
 router.post("/logout", (req, res) => {

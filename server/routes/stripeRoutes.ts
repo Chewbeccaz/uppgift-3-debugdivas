@@ -124,7 +124,15 @@ router.get("/verify-subscription-session", async (req, res) => {
 });
 
 router.post("/webhook", async (req, res) => {
-  console.log(req.body);
+  switch (req.body.type) {
+    case "customer.subscription.updated":
+      console.log(req.body);
+      break;
+    default:
+      console.log(req.body.type);
+      break;
+  }
+
   res.json({});
 });
 

@@ -45,7 +45,7 @@ export const Signup = () => {
 
       if (response.status === 201) {
         setMessage("Konto skapat!");
-        const userId = response.data.userId; 
+        const userId = response.data.userId;
         setUserId(userId);
       } else {
         setMessage("Något gick fel, vänligen försök igen.");
@@ -70,22 +70,24 @@ export const Signup = () => {
 
   const handleSubPayment = async () => {
     if (userId === null) {
-      alert("skapa ett konto först")
-      return; 
+      alert("skapa ett konto först");
+      return;
     }
     try {
-      const response = await axios.post("/api/stripe/create-subscription-session", {
-        userId: userId
-      });
-      const { url, session } = response.data; 
-      window.location.href = url; 
+      const response = await axios.post(
+        "/api/stripe/create-subscription-session",
+        {
+          userId: userId,
+        }
+      );
+      const { url, session } = response.data;
+      localStorage.setItem("user_id", JSON.stringify(userId));
+      window.location.href = url;
       console.log(session);
     } catch (e) {
       console.error(e);
     }
   };
-
-  
 
   return (
     <>

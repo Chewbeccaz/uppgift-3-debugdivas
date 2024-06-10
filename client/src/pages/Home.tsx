@@ -3,6 +3,7 @@ import fisk from "../assets/fisk.png";
 import fisk2 from "../assets/fisk2.png";
 import "../styles/home.css";
 import React, { useState, useEffect } from 'react'; // Importera useState och useEffect
+import { SubLevel } from "../components/SubLevel";
 
 export const Home = () => {
   // Skapar en state för att lagra den aktuella toppositionen för fisk1
@@ -34,6 +35,7 @@ useEffect(() => {
       <h3>Välkommen till</h3>
       <h2>havsnyheter!</h2>
 
+        <SubLevel />
       <div style={{ overflow:"hidden"}}>
         <motion.img
           src={fisk}

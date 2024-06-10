@@ -5,6 +5,7 @@ import "express-session";
 import levelsRoutes from "./routes/levelsRoutes";
 import stripeRoutes from "./routes/stripeRoutes";
 
+
 const app = express();
 const PORT: Number = 3000;
 
@@ -14,6 +15,7 @@ app.use("/articles", articleRoutes);
 app.use("/users", userRoutes);
 app.use("/levels", levelsRoutes);
 app.use("/stripe", stripeRoutes);
+
 
 // const dbConfig = {
 //   host: "localhost",

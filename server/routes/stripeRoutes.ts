@@ -1,6 +1,8 @@
 import { Router } from "express";
 import mysql from "mysql2/promise";
-import { RowDataPacket } from "mysql2";
+// import { RowDataPacket } from "mysql2";
+import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
+
 import dbConfig from "../db/config";
 import { initStripe } from "../stripe";
 import dotenv from "dotenv";
@@ -10,21 +12,10 @@ const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
 const router = Router();
 const stripe = initStripe();
 
-// const getUserById = async (userId: number) => {
-//   const db = await mysql.createConnection(dbConfig);
-//   const query = `SELECT * FROM users WHERE id = ?`;
-//   const [results]: [any[], any] = await db.query(query, [userId]);
-//   // await db.end();
-//   if (results.length > 0) {
-//     return results[0];
-//   } else {
-//     throw new Error("User not found");
-//   }
-// };
-
 router.post("/create-subscription-session", async (req, res) => {
   const { userId } = req.body;
   console.log(userId);
+  console.log(`Creating subscription session for userId: ${userId}`);
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -35,9 +26,16 @@ router.post("/create-subscription-session", async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: "http://localhost:5173/confirmation", //Ersätt med egen confirmation sedan.
+      success_url: "http://localhost:5173/confirmation",
       cancel_url: "http://localhost:5173/",
+      metadata: {
+        user_id: userId,
+      },
     });
+
+    // Logga om metadatan sätts
+    console.log("Session metadata:", session.metadata);
+    console.log("User ID passed in metadata:", userId);
 
     console.log("session: ", session.id, session.url);
     const sessionId = session.id;
@@ -46,11 +44,11 @@ router.post("/create-subscription-session", async (req, res) => {
 
     console.log("sessionId: ", sessionId);
 
-    // Spara sessionsid till databasen
+    // Spara sessionId och userId till databasen
     const db = await mysql.createConnection(dbConfig);
     const query = `
        INSERT INTO payments (stripe_session_id, user_id, payment_date)
-       VALUES (?, ?, ?)
+       VALUES (?,?,?)
      `;
     const values = [sessionId, user_id, new Date()];
 
@@ -58,35 +56,11 @@ router.post("/create-subscription-session", async (req, res) => {
 
     res.json({ url: session.url, session, user_id });
     console.log("session är klar? ", session);
-  } catch {
+  } catch (error) {
+    console.error("Error creating subscription session:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-//SKAPA EN VERIFY SESSION.
-// router.get("/verify-subscription-session", async (req, res) => {
-//   const sessionId = req.query.sessionId as string;
-
-//   if (!sessionId) {
-//     return res.status(400).json({ error: "sessionId is required" });
-//   }
-
-//   try {
-//     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-//     if (session.payment_status === "paid") {
-//       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-//       return res
-//         .status(200)
-//         .json({ verified: true, lineItems: lineItems.data });
-//     } else {
-//       return res.status(200).json({ verified: false });
-//     }
-//   } catch (error) {
-//     console.error("Error verifying subscription session:", error);
-//     return res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 
 router.get("/verify-subscription-session", async (req, res) => {
   const userId = req.query.userId as string;
@@ -111,6 +85,19 @@ router.get("/verify-subscription-session", async (req, res) => {
 
     if (session.payment_status === "paid") {
       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
+
+      // Hämta subscription och customer ID
+      const subscriptionId = session.subscription;
+      const customerId = session.customer;
+
+      // Spara till databasen
+      const insertQuery = `
+        INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id)
+        VALUES (?, ?, ?)
+      `;
+      const insertValues = [userId, subscriptionId, customerId];
+      await db.query(insertQuery, insertValues);
+
       return res
         .status(200)
         .json({ verified: true, lineItems: lineItems.data, session });
@@ -123,9 +110,10 @@ router.get("/verify-subscription-session", async (req, res) => {
   }
 });
 
+//TODO: Använd för att kolla om payment ej gått igenom eller blvit over_due??
 router.post("/webhook", async (req, res) => {
   switch (req.body.type) {
-    case "customer.subscription.updated":
+    case "customer.subscription.created":
       console.log(req.body);
       break;
     default:
@@ -136,65 +124,55 @@ router.post("/webhook", async (req, res) => {
   res.json({});
 });
 
-// router.get("/verify-subscription-session", async (req, res) => {
-//   try {
+//*****************************************UPPGRADERA  */
+router.post("/upgrade-subscription", async (req, res) => {
+  const { userId } = req.body;
+  console.log("Received request to upgrade subscription:", req.body);
 
-//     const sessionIdParam = req.query.sessionId;
+  try {
+    // Hämta kundens prenumerationer
+    const subscriptions = await stripe.subscriptions.list({
+      customer: userId,
+    });
 
-//     if (!sessionIdParam) {
-//       return res.status(400).json({ error: "Session ID is required" });
-//     }
+    console.log("Fetched subscriptions for user:", subscriptions);
 
-//     const sessionId = sessionIdParam as string;
+    const subscription = subscriptions.data[0]; // Anta att det bara finns en prenumeration
 
-//     // Retrieve the checkout session using the session ID
-//     const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (subscription) {
+      const updatedSubscription = await stripe.subscriptions.update(
+        subscription.id,
+        {
+          items: [
+            {
+              price: TRITION_KEY, // Pris-ID från Stripe
+              quantity: 1,
+            },
+          ],
+        }
+      );
 
-//     // Extract the subscription ID from the session
-//     const subscriptionId = session.subscription;
+      console.log("Updated subscription:", updatedSubscription);
 
-//     if (!subscriptionId) {
-//       return res.status(404).json({ error: "Subscription not found" });
-//     }
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "setup",
+        customer: userId,
+        success_url: "http://localhost:5173/confirmation", // Ersätt med egen confirmation-URL
+        cancel_url: "http://localhost:5173/",
+      });
 
-//     // Perform a type assertion to treat subscriptionId as a string
-//     const subscriptionIdStr = subscriptionId as string;
+      console.log("Created checkout session:", session);
 
-//     // Retrieve the subscription details
-//     const subscription = await stripe.subscriptions.retrieve(subscriptionIdStr);
-
-//     // Check the subscription status
-//     if (subscription.status === 'active') {
-//       res.json({ status: 'success', message: 'Subscription is active' });
-//     } else {
-//       res.json({ status: 'error', message: `Subscription status: ${subscription.status}` });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
-
-//Denna ska kunna återbrukas när tillexempel betalning ej gått igenom och man vill förnya.
-// const createSubscriptionSession = async (req: Request, res: Response) => {
-//   try {
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ['card'],
-//       mode: 'subscription',
-//       line_items: [{
-//         price: BLUNDER_KEY, // Pris-ID från Stripe
-//         quantity: 1,
-//       }],
-//       success_url: "http://localhost:5173/", //Ersätt med egen confirmation sedan.
-//       cancel_url: "http://localhost:5173/",
-//     });
-//     res.json({ url: session.url });
-//   } catch (e) {
-//     res.status(500).json({ error: e.message });
-//   }
-// };
-
-// router.post("/create-subscription-session", createSubscriptionSession);
-// router.post("/verify-session", verifySession);
+      res.json({ url: session.url, updatedSubscription });
+    } else {
+      console.error("No subscription found for user");
+      res.status(400).json({ error: "No subscription found for user" });
+    }
+  } catch (error) {
+    console.error("Error upgrading subscription:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 export default router;

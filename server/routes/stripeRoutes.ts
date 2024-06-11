@@ -12,6 +12,44 @@ const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
 const router = Router();
 const stripe = initStripe();
 
+router.delete('/cancel-subscription', async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const subscriptionId = await getSubscriptionId(userId);
+    console.log(`Retrieved subscriptionId: ${subscriptionId} for userId: ${userId}`);
+    
+    if (!subscriptionId) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId);
+
+    res.status(200).json({ message: 'Subscription canceled successfully', canceledSubscription });
+  } catch (error) {
+    console.error('Error canceling subscription:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+async function getSubscriptionId(userId: string): Promise<string | null> {
+  try {
+    const db = await mysql.createConnection(dbConfig);
+    const [rows] = await db.query<RowDataPacket[]>(
+      'SELECT stripe_subscription_id FROM subscriptions WHERE user_id = ?',
+      [userId]
+    );
+
+    if (rows.length > 0) {
+      return rows[0].stripe_subscription_id; 
+    } else {
+      return null; 
+    }
+  } catch (error) {
+    console.error('Error fetching subscription ID:', error);
+    return null;
+  }
+}
+
 router.post("/create-subscription-session", async (req, res) => {
   const { userId } = req.body;
   console.log(userId);

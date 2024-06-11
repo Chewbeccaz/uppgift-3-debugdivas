@@ -9,6 +9,7 @@ import "../styles/SubLevel.css";
 export const SubLevel = () => {
   const { user } = useUser();
   const [subscriptionLevel, setSubscriptionLevel] = useState<number | null>(null);
+   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchSubscriptionLevel = async () => {
@@ -25,6 +26,23 @@ export const SubLevel = () => {
     fetchSubscriptionLevel();
   }, [user]);
 
+  const handleUpgrade = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const response = await axios.post("/api/upgrade-subscription", {
+        userId: user.userId,
+        newPriceId: "NEW_PRICE_ID", // Ersätt med den nya pris-ID du vill uppgradera till
+      });
+      const { url, updatedSubscription } = response.data;
+      window.location.href = url;
+      console.log(updatedSubscription);
+    } catch (error) {
+      console.error("Failed to upgrade subscription:", error);
+    }
+  };
+
   return (
     <div className="container">
       <div className="newsletter blunder-content" data-access={subscriptionLevel && subscriptionLevel >= 2 ? "accessible" : "restricted"}>
@@ -35,7 +53,9 @@ export const SubLevel = () => {
       </div>
       {subscriptionLevel && subscriptionLevel < 4 && (
         <div className="upgrade-button" style={{ marginTop: '50px' }}>
-          <a href="/uppgradera">Uppgradera</a>
+          <button onClick={handleUpgrade} disabled={loading}>
+            {loading ? "Uppgraderar..." : "Uppgradera"}
+          </button>
         </div>
       )}
       <div className="newsletter triton-content" data-access={subscriptionLevel && subscriptionLevel >= 4 ? "accessible" : "restricted"}>

@@ -12,6 +12,42 @@ const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
 const router = Router();
 const stripe = initStripe();
 
+//******************** Information till min sida ********************* 
+
+router.get('/subscription-info', async (req, res) => {
+  const userId = req.query.userId as string | undefined;
+  
+  if (!userId) {
+    return res.status(400).json({ error: 'userId is required' });
+  }
+
+  try {
+    const subscriptionId = await getSubscriptionId(userId);
+    if (!subscriptionId) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    const { items, latest_invoice, current_period_end } = subscription;
+    const priceId = items.data[0].price.id;
+    const product = await stripe.products.retrieve(items.data[0].price.product as string);
+    const invoice = await stripe.invoices.retrieve(latest_invoice as string);
+
+    res.status(200).json({
+      subscriptionLevel: product.name,
+      lastPaymentDate: invoice.status_transitions.finalized_at,
+      nextPaymentDate: current_period_end,
+    });
+  } catch (error) {
+    console.error('Error fetching subscription info:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+//******************* Cancel subscription ********************** */
+
 router.delete('/cancel-subscription', async (req, res) => {
   const { userId } = req.body;
   try {

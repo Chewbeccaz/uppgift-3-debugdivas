@@ -79,7 +79,7 @@ export const SubLevel = () => {
 
   useEffect(() => {
     const fetchSubscriptionLevel = async () => {
-      if (user) {
+      if (user && user.userId) {
         try {
           const response = await axios.get(
             `/api/users/subscription/${user.userId}`
@@ -101,7 +101,7 @@ export const SubLevel = () => {
     try {
       const response = await axios.post("/api/stripe/upgrade-subscription", {
         userId: user.userId,
-        newPriceId: newPriceId, // Skicka den nya pris-ID som argument
+        newPriceId: newPriceId,
       });
       const { url } = response.data;
       window.location.href = url;
@@ -112,13 +112,15 @@ export const SubLevel = () => {
     }
   };
 
-  const getUpgradeButton = (currentLevel: number, targetLevel: number, priceId: string) => {
+  const getUpgradeButton = (
+    currentLevel: number,
+    targetLevel: number,
+    priceId: string
+  ) => {
     if (subscriptionLevel && subscriptionLevel < targetLevel) {
       return (
         <div className="upgrade-button" style={{ marginTop: "10px" }}>
-          <button
-            onClick={() => handleUpgrade(priceId)}
-            disabled={loading}>
+          <button onClick={() => handleUpgrade(priceId)} disabled={loading}>
             {loading ? "Uppgraderar..." : "Uppgradera"}
           </button>
         </div>
@@ -157,7 +159,6 @@ export const SubLevel = () => {
             : "restricted"
         }>
         <Triton />
-        
       </div>
       {getUpgradeButton(subscriptionLevel, 4, "TRITON_KEY")}
     </div>

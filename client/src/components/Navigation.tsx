@@ -27,36 +27,6 @@ export const Navigation = () => {
     }
   };
 
-  //Flytta till en services kanske om behov finns?
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     try {
-  //       const response = await axios.get("/api/users/check-session", {
-  //         withCredentials: true,
-  //       });
-  //       setIsLoggedIn(response.data.isLoggedIn);
-  //     } catch (error) {
-  //       console.error("Session check failed:", error);
-  //       setIsLoggedIn(false);
-  //     }
-  //   };
-
-  //   checkSession();
-  // }, []);
-
-  // const handleLoginLogout = async () => {
-  //   if (isLoggedIn) {
-  //     try {
-  //       await axios.post("/api/users/logout");
-  //       setIsLoggedIn(false);
-  //     } catch (error) {
-  //       console.error("Logout failed:", error);
-  //     }
-  //   } else {
-  //     window.location.href = "/login";
-  //   }
-  // };
-
   return (
     <>
       <nav>

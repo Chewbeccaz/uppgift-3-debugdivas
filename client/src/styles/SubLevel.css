@@ -46,6 +46,20 @@ h1 {
   background-color: #0290d7;
 }
 
+.upgrade-button button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #00aaff;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  z-index: 2;
+  position: relative;
+}
+
 .newsletter[data-access="restricted"] {
   filter: blur(5px);
   pointer-events: none;

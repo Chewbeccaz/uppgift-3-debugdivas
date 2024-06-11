@@ -64,7 +64,6 @@
 //     </div>
 //   );
 // };
-
 import { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext";
 import { Blunder } from "../components/Blunder";
@@ -75,9 +74,7 @@ import "../styles/SubLevel.css";
 
 export const SubLevel = () => {
   const { user } = useUser();
-  const [subscriptionLevel, setSubscriptionLevel] = useState<number | null>(
-    null
-  );
+  const [subscriptionLevel, setSubscriptionLevel] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -102,18 +99,32 @@ export const SubLevel = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/upgrade-subscription", {
+      const response = await axios.post("/api/stripe/upgrade-subscription", {
         userId: user.userId,
         newPriceId: newPriceId, // Skicka den nya pris-ID som argument
       });
-      const { url, updatedSubscription } = response.data;
+      const { url } = response.data;
       window.location.href = url;
-      console.log(updatedSubscription);
     } catch (error) {
       console.error("Failed to upgrade subscription:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getUpgradeButton = (currentLevel: number, targetLevel: number, priceId: string) => {
+    if (subscriptionLevel && subscriptionLevel < targetLevel) {
+      return (
+        <div className="upgrade-button" style={{ marginTop: "10px" }}>
+          <button
+            onClick={() => handleUpgrade(priceId)}
+            disabled={loading}>
+            {loading ? "Uppgraderar..." : "Uppgradera"}
+          </button>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -126,16 +137,8 @@ export const SubLevel = () => {
             : "restricted"
         }>
         <Blunder />
-        {subscriptionLevel && subscriptionLevel < 2 && (
-          <div className="upgrade-button" style={{ marginTop: "10px" }}>
-            <button
-              onClick={() => handleUpgrade("NEW_PRICE_ID_BLUNDER")}
-              disabled={loading}>
-              {loading ? "Uppgraderar..." : "Uppgradera"}
-            </button>
-          </div>
-        )}
       </div>
+      {getUpgradeButton(subscriptionLevel, 2, "BLUNDER_KEY")}
       <div
         className="newsletter ariel-content"
         data-access={
@@ -144,16 +147,8 @@ export const SubLevel = () => {
             : "restricted"
         }>
         <Ariel />
-        {subscriptionLevel && subscriptionLevel < 3 && (
-          <div className="upgrade-button" style={{ marginTop: "10px" }}>
-            <button
-              onClick={() => handleUpgrade("NEW_PRICE_ID_ARIEL")}
-              disabled={loading}>
-              {loading ? "Uppgraderar..." : "Uppgradera"}
-            </button>
-          </div>
-        )}
       </div>
+      {getUpgradeButton(subscriptionLevel, 3, "ARIEL_KEY")}
       <div
         className="newsletter triton-content"
         data-access={
@@ -162,15 +157,9 @@ export const SubLevel = () => {
             : "restricted"
         }>
         <Triton />
-        {subscriptionLevel && subscriptionLevel < 4 && (
-          <div className="upgrade-button" style={{ marginTop: "10px" }}></div>
-        )}
+        
       </div>
-      <button
-        onClick={() => handleUpgrade("NEW_PRICE_ID_TRITON")}
-        disabled={loading}>
-        {loading ? "Uppgraderar..." : "Uppgradera"}
-      </button>
+      {getUpgradeButton(subscriptionLevel, 4, "TRITON_KEY")}
     </div>
   );
 };

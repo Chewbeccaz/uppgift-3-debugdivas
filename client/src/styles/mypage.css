@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap");
+
+/*.loader-mypage {
+    height: 30px;
+    aspect-ratio: 6;
+    --c: #0000 64%,hwb(240 3% 69%) 66% 98%,#0000 101%;
+    background:
+      radial-gradient(35% 146% at 50% 159%,var(--c)) 0 0,
+      radial-gradient(35% 146% at 50% -59%,var(--c)) 25% 100%;
+    background-size: calc(100%/3) 50%;
+    background-repeat: repeat-x;
+    clip-path: inset(0 100% 0 0);
+    animation: l2 1s infinite linear;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    position: absolute;
+    margin: 20px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  @keyframes l2{
+    90%,to {clip-path: inset(0)}
+  }*/
+
+
+  .loader-mypage {
+    width: 80px;
+    height: 40px;
+    background:
+      radial-gradient(circle 11px at top,#0000 94%,#b0e5f3) 0 20px,
+      radial-gradient(circle 11px at top,#0000 94%,#5dc1e4) 0 10px,
+      radial-gradient(circle 11px at top,#0000 94%,#008cd9) 0 0   ;
+    background-size: 20px 100%;
+    background-repeat: repeat-x;
+    animation: l7 1s infinite linear;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    position: absolute;
+    margin-top: 15px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  @keyframes l7 {
+    50%  {background-position: 10px 15px,-10px 12px,15px 8px}
+    100% {background-position: 20px 20px,-20px 10px,20px 0px}
+  }
+
+
+.container-mypage {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  padding: 20px;
+  width: 100%;  
+}
+
+.box-mypage {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 30%;
+  padding: 20px;
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 300px;
+  justify-content: center; 
+}
+
+.box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.box-mypage p, h4 {
+  margin: 5px 0;
+  font-family: "Poppins", sans-serif;
+  padding: 5px;
+}
+
+.cancel-btn {
+    background-color: #f39c12;
+    border: none;
+    color: white;
+    padding: 10px;
+    text-transform: uppercase;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    font-family: "Montserrat", sans-serif;
+    margin: 10px;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #e67e22;
+  }

@@ -11,7 +11,7 @@ export const Upgrade = () => {
       try {
         const response = await axios.post("/api/stripe/upgrade-subscription", {
           userId: user?.userId,
-          newPriceId: "NEW_PRICE_ID" // Ersätt med den nya pris-ID du vill uppgradera till
+          newPriceId: "NEW_PRICE_ID", // Ersätt med den nya pris-ID du vill uppgradera till
         });
         setSessionId(response.data.updatedSubscription.id);
       } catch (error) {

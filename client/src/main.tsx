@@ -6,9 +6,7 @@ import { Router } from "./Router.tsx";
 import { UserProvider } from "./context/UserContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <UserProvider>
-      <RouterProvider router={Router}></RouterProvider>
-    </UserProvider>
-  </React.StrictMode>
+  <UserProvider>
+    <RouterProvider router={Router}></RouterProvider>
+  </UserProvider>
 );

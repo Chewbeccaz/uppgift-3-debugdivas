@@ -10,20 +10,20 @@ export const MyPage = () => {
   const cancelSubscription = async () => {
     if (user) {
       try {
-        const response = await axios.delete('/api/users/cancel-subscription');
-  
+        const response = await axios.delete('api/stripe/cancel-subscription', {
+          data: { userId: user.userId }
+        });
+        console.log('Response from cancel-subscription:', response);
         if (response.status === 200) {
-          setMessage('Subscription canceled successfully.');
+          setMessage('Prenumerationen är avslutad.');
         } else {
-          setMessage('Failed to cancel subscription.');
+          setMessage('Kunde inte avsluta prenumerationen, forsök igen.');
         }
       } catch (error) {
-        setMessage('An error occurred. Please try again.');
+        setMessage('Ett fel uppstod, försök igen');
       }
     }
   };
-
-  //Just nu gör inte endpointen så mycket, då det är osäkert hur vi ska göra med databasen och stripe/webhook. Detta är bara en start 
 
   return (
     <div>

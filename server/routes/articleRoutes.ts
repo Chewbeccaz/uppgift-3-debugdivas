@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
 
   const [results, fields] = await db.query("SELECT * FROM `articles`");
 
-  console.log(results, fields);
+  // console.log(results, fields);
 });
 
 //Återanvändbar funktion:
@@ -29,7 +29,7 @@ const fetchArticlesByLevel = async (subscriptionLevel: number) => {
     [subscriptionLevel]
   );
   // await db.end();
-  console.log(results);
+  // console.log(results);
   return results;
 };
 

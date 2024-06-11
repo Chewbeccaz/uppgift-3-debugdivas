@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mysql from "mysql2/promise";
 // import { RowDataPacket } from "mysql2";
-import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
+import { RowDataPacket } from "mysql2/promise";
 
 import dbConfig from "../db/config";
 import { initStripe } from "../stripe";
@@ -125,54 +125,59 @@ router.post("/webhook", async (req, res) => {
 });
 
 //*****************************************UPPGRADERA  */
-router.post("/upgrade-subscription", async (req, res) => {
-  const { userId } = req.body;
-  console.log("Received request to upgrade subscription:", req.body);
+router.post('/upgrade-subscription', async (req, res) => {
+  const { userId, priceId } = req.body;
+  console.log('Received request to upgrade subscription:', req.body);
 
   try {
-    // Hämta kundens prenumerationer
+    // Koppla till databasen
+    const connection = await mysql.createConnection(dbConfig);
+
+    // Hämta stripe_customer_id från subscriptions-tabellen baserat på userId
+
+    const [rows] = await connection.execute<mysql.RowDataPacket[]>(
+      'SELECT stripe_subscription_id FROM subscriptions WHERE user_id = ?',
+      [userId]
+    );
+
+    const stripeSubscriptionId = rows[0].stripe_subscription_id;
+    console.log('Fetched stripe_customer_id:', stripeSubscriptionId);
+
+    // Hämta användarens prenumerationer från Stripe
     const subscriptions = await stripe.subscriptions.list({
-      customer: userId,
+      customer: stripeSubscriptionId,
     });
 
-    console.log("Fetched subscriptions for user:", subscriptions);
-
-    const subscription = subscriptions.data[0]; // Anta att det bara finns en prenumeration
+    const subscription = subscriptions.data[0]; // Antag att det finns bara en prenumeration
 
     if (subscription) {
+      // Uppdatera prenumerationen med nytt pris-id
       const updatedSubscription = await stripe.subscriptions.update(
         subscription.id,
         {
           items: [
             {
-              price: TRITION_KEY, // Pris-ID från Stripe
-              quantity: 1,
+              id: subscription.items.data[0].id, // Behåll existerande item-id
+              price: priceId, // Nytt pris-id
             },
           ],
         }
       );
 
-      console.log("Updated subscription:", updatedSubscription);
+      console.log('Updated subscription:', updatedSubscription);
 
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        mode: "setup",
-        customer: userId,
-        success_url: "http://localhost:5173/confirmation", // Ersätt med egen confirmation-URL
-        cancel_url: "http://localhost:5173/",
-      });
-
-      console.log("Created checkout session:", session);
-
-      res.json({ url: session.url, updatedSubscription });
+      res.json({ updatedSubscription });
     } else {
-      console.error("No subscription found for user");
-      res.status(400).json({ error: "No subscription found for user" });
+      console.error('No subscription found for user');
+      res.status(400).json({ error: 'No subscription found for user' });
     }
   } catch (error) {
-    console.error("Error upgrading subscription:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Error upgrading subscription:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+
 
 export default router;

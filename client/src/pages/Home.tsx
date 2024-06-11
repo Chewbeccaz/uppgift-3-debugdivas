@@ -11,7 +11,7 @@ export const Home = () => {
   // Skapar en state för att lagra den aktuella toppositionen för fisk1
   const [topPosition, setTopPosition] = useState("50px"); // Startposition
 
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
 
   // Funktion för att generera en slumpmässig topposition
   const generateRandomTopPosition = () => {
@@ -35,12 +35,18 @@ export const Home = () => {
     return () => clearTimeout(timer); // Rensa upp timern när komponenten destrueras
   }, [topPosition]); // Dependencyn är topPosition så att effekten körs igen när toppositionen ändras
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("Användaren är inloggad:", user);
+    }
+  }, [isAuthenticated, user]);
+
   return (
     <>
       <h3>Välkommen till</h3>
       <h2 id="title">havsnyheter!</h2>
 
-      {user ? <SubLevel /> : <Plan />}
+      {isAuthenticated ? <SubLevel /> : <Plan />}
 
       {/* <SubLevel /> */}
       <div style={{ overflow: "hidden" }}>

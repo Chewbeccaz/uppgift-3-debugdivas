@@ -68,9 +68,22 @@ router.get("/subscription-info", async (req, res) => {
       return res.status(404).json({ error: "Subscription not found" });
     }
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const db = await mysql.createConnection(dbConfig);
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT stripe_subscription_id, status FROM subscriptions WHERE user_id = ?",
+      [userId]
+    );
 
-    const { items, latest_invoice, current_period_end } = subscription;
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    const retrievedSubscriptionId = rows[0].stripe_subscription_id;
+    const status = rows[0].status;
+
+    const subscription = await stripe.subscriptions.retrieve(retrievedSubscriptionId);
+
+    const { items, latest_invoice, current_period_end, cancel_at_period_end } = subscription;
     const priceId = items.data[0].price.id;
     const product = await stripe.products.retrieve(
       items.data[0].price.product as string
@@ -81,12 +94,16 @@ router.get("/subscription-info", async (req, res) => {
       subscriptionLevel: product.name,
       lastPaymentDate: invoice.status_transitions.finalized_at,
       nextPaymentDate: current_period_end,
+      status: status,
+      cancelAtPeriodEnd: cancel_at_period_end,
     });
+
   } catch (error) {
     console.error("Error fetching subscription info:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 //******************* Cancel subscription ********************** */
 
@@ -102,8 +119,17 @@ router.delete("/cancel-subscription", async (req, res) => {
       return res.status(404).json({ error: "Subscription not found" });
     }
 
-    const canceledSubscription = await stripe.subscriptions.cancel(
+    /* const canceledSubscription = await stripe.subscriptions.cancel(
       subscriptionId
+    ); */
+    const canceledSubscription = await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    });
+
+    const db = await mysql.createConnection(dbConfig);
+    await db.query(
+      "UPDATE subscriptions SET status = 'expired' WHERE user_id = ?",
+      [userId]
     );
 
     res.status(200).json({

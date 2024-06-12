@@ -374,25 +374,45 @@ router.post("/upgrade-subscription", async (req, res) => {
 });
 
 //******************FÖRNYA SUBSCRIPTION: *****//////////////
-// router.post("/create-billing-portal-session", async (req, res) => {
-//   const { userId } = req.body;
+router.get("/generate-invoice-link", async (req, res) => {
+  const userId = req.query.userId as string | undefined;
+  console.log("kommer vi hit", userId);
 
-//   try {
-//     const customerId = await getCustomerId(userId);
-//     if (!customerId) {
-//       return res.status(404).json({ error: "Customer not found" });
-//     }
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
 
-//     const session = await stripe.billingPortal.sessions.create({
-//       customer: customerId,
-//       return_url: "http://localhost:5173/",
-//     });
+  try {
+    // Retrieve the stripe_customer_id from the database
+    const customerId = await getCustomerId(userId);
+    if (!customerId) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
 
-//     res.json({ url: session.url });
-//   } catch (error) {
-//     console.error("Error creating billing portal session:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
+    // List the customer's invoices and select the most recent one
+    const invoices = await stripe.invoices.list({
+      customer: customerId,
+      limit: 1,
+      status: "open",
+    });
+
+    if (invoices.data.length === 0) {
+      return res.status(404).json({ error: "No open invoices found" });
+    }
+
+    const invoice = invoices.data[0];
+    const invoiceId = invoice.id; // Store the invoice ID for later use
+
+    // Send the invoice manually
+    const sentInvoice = await stripe.invoices.sendInvoice(invoiceId);
+
+    // Optionally, you can now return the sent invoice details instead of just the invoice URL
+    res.status(200).json({ sentInvoice });
+  } catch (error) {
+    console.error("Error generating and sending invoice:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 export default router;

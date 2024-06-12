@@ -4,7 +4,12 @@
 //      loading: boolean;
 //    }
 
+import Payment from "./Payment";
+
+
 export const NoAccess = () => {
+
+
   return (
     <div className="restricted-content">
       <div className="overlay">
@@ -12,7 +17,7 @@ export const NoAccess = () => {
           Du har inte tillgång till prenumerationsinnehållet. Vänligen starta en
           ny eller återuppta din gamla prenumeration.
         </p>
-        {/* <Payment /> */}
+        <Payment/>
       </div>
     </div>
   );

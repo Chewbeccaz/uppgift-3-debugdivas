@@ -81,9 +81,12 @@ router.get("/subscription-info", async (req, res) => {
     const retrievedSubscriptionId = rows[0].stripe_subscription_id;
     const status = rows[0].status;
 
-    const subscription = await stripe.subscriptions.retrieve(retrievedSubscriptionId);
+    const subscription = await stripe.subscriptions.retrieve(
+      retrievedSubscriptionId
+    );
 
-    const { items, latest_invoice, current_period_end, cancel_at_period_end } = subscription;
+    const { items, latest_invoice, current_period_end, cancel_at_period_end } =
+      subscription;
     const priceId = items.data[0].price.id;
     const product = await stripe.products.retrieve(
       items.data[0].price.product as string
@@ -97,13 +100,11 @@ router.get("/subscription-info", async (req, res) => {
       status: status,
       cancelAtPeriodEnd: cancel_at_period_end,
     });
-
   } catch (error) {
     console.error("Error fetching subscription info:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 //******************* Cancel subscription ********************** */
 
@@ -122,9 +123,12 @@ router.delete("/cancel-subscription", async (req, res) => {
     /* const canceledSubscription = await stripe.subscriptions.cancel(
       subscriptionId
     ); */
-    const canceledSubscription = await stripe.subscriptions.update(subscriptionId, {
-      cancel_at_period_end: true,
-    });
+    const canceledSubscription = await stripe.subscriptions.update(
+      subscriptionId,
+      {
+        cancel_at_period_end: true,
+      }
+    );
 
     const db = await mysql.createConnection(dbConfig);
     await db.query(
@@ -368,5 +372,27 @@ router.post("/upgrade-subscription", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+//******************FÖRNYA SUBSCRIPTION: *****//////////////
+// router.post("/create-billing-portal-session", async (req, res) => {
+//   const { userId } = req.body;
+
+//   try {
+//     const customerId = await getCustomerId(userId);
+//     if (!customerId) {
+//       return res.status(404).json({ error: "Customer not found" });
+//     }
+
+//     const session = await stripe.billingPortal.sessions.create({
+//       customer: customerId,
+//       return_url: "http://localhost:5173/",
+//     });
+
+//     res.json({ url: session.url });
+//   } catch (error) {
+//     console.error("Error creating billing portal session:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 export default router;

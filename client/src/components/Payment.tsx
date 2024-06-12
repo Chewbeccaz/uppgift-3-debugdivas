@@ -4,6 +4,7 @@ import { SubscriptionLevels } from "../models/SubscriptionLevels";
 import { useUser } from "../context/UserContext";
 
 //DEN HÄR KOMPONENTEN ÅTERAKTIVERAR BARA DET GAMLA SUBSCIPTION SOM VI HADE TIDIGARE? Select spelar ingen roll?
+//RENDERAD EJ UT JUST NU, MEN VI VILL P SIKT LÄGGA IN SELECT OCH PAYMENT FRÅN SIGNUP HIT?
 
 const Payment = () => {
   const [subscriptionId, setSubscriptionId] = useState(1);

@@ -12,43 +12,6 @@ const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
 const router = Router();
 const stripe = initStripe();
 
-
-//1. Hämta användares customer ID
-//const subscriptions = await stripe.subscriptions.list({
- // customer: '{{CUSTOMER_ID}}',
-//});
-
-// The returns the set of subscriptions for the specified customer, from which you can retrieve the subscription ID (id), 
-// any subscription item IDs (items.data.id) and the subscription items price ID (items.data.price.id).
-
-//2. Update a subscription by specifying the subscription item to apply the updated price to.
-// const subscription = await stripe.subscriptions.update(
-//   'sub_xxxxxxxxx',
-//   {
-//     items: [
-//       {
-//         id: '{{SUB_ITEM_ID}}',
-//         price: '{{NEW_PRICE_ID}}',
-//       },
-//     ],
-//   }
-// );
-
-// const subscription = await stripe.subscriptions.update(
-//   'sub_xxxxxxxxx',
-//   {
-//     items: [
-//       {
-//         id: '{{SUB_ITEM_ID}}',
-//         deleted: true,
-//       },
-//       {
-//         price: '{{NEW_PRICE_ID}}',
-//       },
-//     ],
-//   }
-// );
-
 //**********************HÄMTA SUBSCRIPTION ID*********************/
 async function getSubscriptionId(userId: string): Promise<string | null> {
   try {
@@ -263,63 +226,110 @@ router.get("/verify-subscription-session", async (req, res) => {
 });
 
 //TODO: Använd för att kolla om payment ej gått igenom eller blvit over_due??
-router.post("/webhook", async (req, res) => {
-  switch (req.body.type) {
-    case "customer.subscription.created":
-      console.log(req.body);
-      break;
-    default:
-      console.log(req.body.type);
-      break;
-  }
+// router.post("/webhook", async (req, res) => {
+//   switch (req.body.type) {
+//     case "customer.subscription.updated":
+//       console.log(req.body);
+//       break;
+//     default:
+//       console.log(req.body.type);
+//       break;
+//   }
 
-  res.json({});
+//   res.json({});
+// });
+
+router.post("/webhook", async (req, res) => {
+  try {
+    const event = req.body;
+
+    if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object;
+      const subscriptionId = subscription.id;
+      const status = subscription.status;
+
+      if (
+        status === "past_due" ||
+        status === "unpaid" ||
+        status === "canceled"
+      ) {
+        const db = await mysql.createConnection(dbConfig);
+
+        const [rows] = await db.query<RowDataPacket[]>(
+          "SELECT user_id FROM subscriptions WHERE stripe_subscription_id = ?",
+          [subscriptionId]
+        );
+
+        if (rows.length > 0) {
+          const userId = rows[0].user_id;
+
+          await db.query(
+            "UPDATE subscriptions SET status = 'past_due' WHERE user_id = ?",
+            [userId]
+          );
+
+          console.log(`Updated status to 'past_due' for user ${userId}`);
+        } else {
+          console.log(`No user found with subscription ID ${subscriptionId}`);
+        }
+      }
+    } else {
+      console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error("Error processing webhook event:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 //*****************************************UPPGRADERA  */
 
 router.post("/upgrade-subscription", async (req, res) => {
   const { userId, newPriceId } = req.body;
-  console.log(`Upgrade request received for userId: ${userId}, newPriceId: ${newPriceId}`);
+  console.log(
+    `Upgrade request received for userId: ${userId}, newPriceId: ${newPriceId}`
+  );
 
   try {
-    // Fetch the Customer ID from your database
     const customerId = await getCustomerId(userId);
     console.log(customerId);
 
     if (!customerId) {
-      return res.status(404).json({ message: 'Customer not found' });
+      return res.status(404).json({ message: "Customer not found" });
     }
 
-    // List subscriptions for the customer
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
     });
     console.log("här är våra subscriptions hoppar vi", subscriptions);
 
-    // Find the subscription to update
     let subscriptionToUpdate;
     for (let subscription of subscriptions.data) {
-      if (subscription.items.data.some(item => item.price.id === subscription.items.data[0].price.id)) {
+      if (
+        subscription.items.data.some(
+          (item) => item.price.id === subscription.items.data[0].price.id
+        )
+      ) {
         subscriptionToUpdate = subscription;
         break;
       }
     }
 
     if (!subscriptionToUpdate) {
-      return res.status(404).json({ message: 'Subscription not found' });
+      return res.status(404).json({ message: "Subscription not found" });
     }
 
-    // Update the subscription with the new price
     const updatedSubscription = await stripe.subscriptions.update(
       subscriptionToUpdate.id,
       {
         items: [
           {
             id: subscriptionToUpdate.items.data[0].id,
-            price: newPriceId
-          }
-        ]
+            price: newPriceId,
+          },
+        ],
       }
     );
 
@@ -332,6 +342,5 @@ router.post("/upgrade-subscription", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 export default router;

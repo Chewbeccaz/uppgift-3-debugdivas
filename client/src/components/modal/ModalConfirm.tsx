@@ -11,7 +11,7 @@ const ModalConfirm: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
             <div className="modal-overlay" onClick={onClose}>
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                     {children}
-                    <button onClick={onClose}>I understand</button>
+                    <button onClick={onClose}>Kul!</button>
                 </div>
             </div>
         ) : null;

@@ -6,6 +6,8 @@ import { Triton } from "../components/Triton";
 import axios from "axios";
 import "../styles/SubLevel.css";
 import { useNavigate } from "react-router-dom";
+import "../styles/modal.css";
+
 
 
 // import dotenv from "dotenv";
@@ -50,8 +52,9 @@ export const SubLevel = () => {
         userId: user.userId,
         newPriceId: newPriceId,
       });
-      const { url } = response.data;
-      // window.location.href = url;
+
+      console.log(response.data);
+
       navigate('/mypage', { state: { showModal: true } });
       } catch (error) {
         console.error("Failed to upgrade subscription:", error);

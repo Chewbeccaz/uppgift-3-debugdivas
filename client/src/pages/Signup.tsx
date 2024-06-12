@@ -5,6 +5,7 @@ import Modal from "../components/modal/Modal";
 import PrivacyPolicy from "../components/modal/PrivacyPolicy";
 import "../styles/modal.css";
 
+
 export const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

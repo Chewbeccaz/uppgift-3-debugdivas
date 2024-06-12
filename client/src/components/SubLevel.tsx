@@ -5,18 +5,20 @@ import { Ariel } from "../components/Ariel";
 import { Triton } from "../components/Triton";
 import axios from "axios";
 import "../styles/SubLevel.css";
-import dotenv from "dotenv";
-dotenv.config();
-const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
+// import dotenv from "dotenv";
+// dotenv.config();
+// const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
+//Be mattias hjälpa oss med att använda variablerna i klienten.
 
 export const SubLevel = () => {
   const { user } = useUser();
   const [subscriptionLevel, setSubscriptionLevel] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  // const BLUNDER_KEY = "price_1POE5gDwCLdIkrpmfxhpiEiF";
-  // const ARIEL_KEY = "price_1POE61DwCLdIkrpmqtIuoO9v";
-  // const TRITION_KEY = "price_1POE6KDwCLdIkrpmomK5l3YN";
+  //Detta är Nurs hårdkodade keys.
+  const BLUNDER_KEY = "price_1POE5gDwCLdIkrpmfxhpiEiF";
+  const ARIEL_KEY = "price_1POE61DwCLdIkrpmqtIuoO9v";
+  const TRITION_KEY = "price_1POE6KDwCLdIkrpmomK5l3YN";
 
   useEffect(() => {
     const fetchSubscriptionLevel = async () => {

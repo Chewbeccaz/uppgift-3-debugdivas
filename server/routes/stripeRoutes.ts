@@ -85,12 +85,10 @@ router.delete("/cancel-subscription", async (req, res) => {
       subscriptionId
     );
 
-    res
-      .status(200)
-      .json({
-        message: "Subscription canceled successfully",
-        canceledSubscription,
-      });
+    res.status(200).json({
+      message: "Subscription canceled successfully",
+      canceledSubscription,
+    });
   } catch (error) {
     console.error("Error canceling subscription:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -148,7 +146,7 @@ router.post("/create-subscription-session", async (req, res) => {
 });
 
 router.get("/verify-subscription-session", async (req, res) => {
-  const userId = req.query.userId as string;
+  const userId = req.query.userId;
 
   if (!userId) {
     return res.status(400).json({ error: "userId is required" });
@@ -170,18 +168,29 @@ router.get("/verify-subscription-session", async (req, res) => {
 
     if (session.payment_status === "paid") {
       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-
-      // Hämta subscription och customer ID
       const subscriptionId = session.subscription;
       const customerId = session.customer;
 
-      // Spara till databasen
-      const insertQuery = `
-        INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id)
-        VALUES (?, ?, ?)
-      `;
-      const insertValues = [userId, subscriptionId, customerId];
-      await db.query(insertQuery, insertValues);
+      // Kontrollera om prenumerationen redan finns
+      const [subscriptionRows] = await db.query<RowDataPacket[]>(
+        "SELECT * FROM subscriptions WHERE user_id = ?",
+        [userId]
+      );
+
+      if (subscriptionRows.length > 0) {
+        await db.query(
+          "UPDATE subscriptions SET status = 'active' WHERE user_id = ?",
+          [userId]
+        );
+      } else {
+        // Om prenumerationen inte finns, skapa en ny post.
+        const insertQuery = `
+          INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, status)
+          VALUES (?, ?, ?, 'active')
+        `;
+        const insertValues = [userId, subscriptionId, customerId];
+        await db.query(insertQuery, insertValues);
+      }
 
       return res
         .status(200)

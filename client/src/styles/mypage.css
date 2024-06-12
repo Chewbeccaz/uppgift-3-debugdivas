@@ -1,28 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap");
 
-/*.loader-mypage {
-    height: 30px;
-    aspect-ratio: 6;
-    --c: #0000 64%,hwb(240 3% 69%) 66% 98%,#0000 101%;
-    background:
-      radial-gradient(35% 146% at 50% 159%,var(--c)) 0 0,
-      radial-gradient(35% 146% at 50% -59%,var(--c)) 25% 100%;
-    background-size: calc(100%/3) 50%;
-    background-repeat: repeat-x;
-    clip-path: inset(0 100% 0 0);
-    animation: l2 1s infinite linear;
-    display: flex;
-    justify-content: center;
-    align-items: center; 
-    position: absolute;
-    margin: 20px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  @keyframes l2{
-    90%,to {clip-path: inset(0)}
-  }*/
-
 
   .loader-mypage {
     width: 80px;

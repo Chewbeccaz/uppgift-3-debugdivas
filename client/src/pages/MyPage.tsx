@@ -7,13 +7,15 @@ import { useLocation } from 'react-router-dom'
 import ModalConfirm from '../components/modal/ModalConfirm';
 import UpgradeConfirm from "../components/modal/UpgradeConfirm";
 import "../styles/modal.css";
-
+import { SubExpired } from '../components/SubExpired';
 
 interface SubscriptionInfo {
   subscriptionLevel: string;
   lastPaymentDate: number;
   nextPaymentDate: number;
+  status: string;
 }
+
 export const MyPage = () => {
   const { user } = useUser();
   const [message, setMessage] = useState('');
@@ -25,7 +27,7 @@ export const MyPage = () => {
   
   useEffect(() => {
     if (showModal) {
-      setIsModalOpen(true); // Öppna modal om showModal är sant
+      setIsModalOpen(true);
     }
   }, [showModal]);
 
@@ -49,34 +51,47 @@ export const MyPage = () => {
   const cancelSubscription = async () => {
     if (user) {
       try {
-        const response = await axios.delete('api/stripe/cancel-subscription', {
+        const response = await axios.delete('/api/stripe/cancel-subscription', {
           data: { userId: user.userId }
         });
         console.log('Response from cancel-subscription:', response);
         if (response.status === 200) {
-          setMessage('Prenumerationen är avslutad.');
+          setMessage('Prenumerationen kommer att avslutas vid periodens slut.');
+          setSubscriptionInfo((prevInfo) => prevInfo ? { ...prevInfo, status: 'canceled_at_period_end' } : null);
         } else {
-          setMessage('Kunde inte avsluta prenumerationen, forsök igen.');
+          setMessage('Kunde inte avsluta prenumerationen, försök igen.');
         }
       } catch (error) {
         setMessage('Ett fel uppstod, försök igen');
       }
     }
   };
+  
 
   return (
-    <div className="container-mypage"> 
+    <div className="container-mypage">
       <div className="box-mypage">
         {user ? (
           <>
-          {subscriptionInfo ? ( 
+            {subscriptionInfo ? (
               <div>
-                <h4>Prenumerationsnivå: {subscriptionInfo.subscriptionLevel}</h4>             
-                <p>Senaste betalning: {new Date(subscriptionInfo.lastPaymentDate * 1000).toLocaleDateString()}</p>
-                <p>Nästa betalning: {new Date(subscriptionInfo.nextPaymentDate * 1000).toLocaleDateString()}</p>
-                {message && <p>{message}</p>}
-                <button>Uppgradera??</button>
-                <button className="cancel-btn" onClick={cancelSubscription}>Cancel Subscription</button>
+                {subscriptionInfo.status === 'expired' ? (
+                  <SubExpired /> 
+                ) : (
+                  <div>
+                    <h4>Prenumerationsnivå: {subscriptionInfo.subscriptionLevel}</h4>
+                    <p>Senaste betalning: {new Date(subscriptionInfo.lastPaymentDate * 1000).toLocaleDateString()}</p>
+                    <p>Nästa betalning: {new Date(subscriptionInfo.nextPaymentDate * 1000).toLocaleDateString()}</p>
+                    {subscriptionInfo.status === 'canceled_at_period_end' && (
+                      <p>Prenumerationen kommer att avslutas vid periodens slut.</p>
+                    )}
+                    {message && <p>{message}</p>}
+                    <button>Uppgradera??</button>
+                    {subscriptionInfo.status !== 'canceled_at_period_end' && (
+                      <button className="cancel-btn" onClick={cancelSubscription}>Cancel Subscription</button>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div>
@@ -85,14 +100,13 @@ export const MyPage = () => {
               </div>
             )}
             {isModalOpen && (
-  <ModalConfirm
-    isOpen={isModalOpen}
-    onClose={() => setIsModalOpen(false)}
-  >
-  <UpgradeConfirm />
-    ""
-  </ModalConfirm>
-)}
+              <ModalConfirm
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+              >
+                <UpgradeConfirm />
+              </ModalConfirm>
+            )}
           </>
         ) : (
           <Login />

@@ -103,23 +103,23 @@ router.get("/subscriptiondata/:userId", async (req, res) => {
 });
 
 /******************* delete  - CANCEL SUB: **********************/
-//Just nu gör inte endpointen så mycket, då det är osäkert hur vi ska göra med databasen och stripe/webhook. Detta är bara en start
-
-router.delete("/cancel-subscription", async (req, res) => {
-  const { userId } = req.body;
-  try {
-    const db = await mysql.createConnection(dbConfig);
-    const query = `
-          DELETE FROM subscriptions
-          WHERE user_id = ?
-      `;
-    await db.query(query, [userId]);
-    res.status(200).json({ message: "Subscription canceled successfully" });
-  } catch (error) {
-    console.error("Error canceling subscription:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  //Just nu gör inte endpointen så mycket, då det är osäkert hur vi ska göra med databasen och stripe/webhook. Detta är bara en start 
+  
+// router.delete("/cancel-subscription", async (req, res) => {
+  // const { userId } = req.body;
+  // try {
+     // const db = await mysql.createConnection(dbConfig);
+      //const query = `
+        //  DELETE FROM subscriptions
+          //WHERE user_id = ?
+      //`;
+      //await db.query(query, [userId]);
+      //res.status(200).json({ message: "Subscription canceled successfully" });
+  //} catch (error) {
+    //  console.error("Error canceling subscription:", error);
+     // res.status(500).json({ error: "Internal Server Error" });
+  //}
+//});
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;

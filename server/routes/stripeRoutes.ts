@@ -12,7 +12,44 @@ const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
 const router = Router();
 const stripe = initStripe();
 
-//**********************HÄMTA ANVÄNDARE*********************/
+
+//1. Hämta användares customer ID
+//const subscriptions = await stripe.subscriptions.list({
+ // customer: '{{CUSTOMER_ID}}',
+//});
+
+// The returns the set of subscriptions for the specified customer, from which you can retrieve the subscription ID (id), 
+// any subscription item IDs (items.data.id) and the subscription items price ID (items.data.price.id).
+
+//2. Update a subscription by specifying the subscription item to apply the updated price to.
+// const subscription = await stripe.subscriptions.update(
+//   'sub_xxxxxxxxx',
+//   {
+//     items: [
+//       {
+//         id: '{{SUB_ITEM_ID}}',
+//         price: '{{NEW_PRICE_ID}}',
+//       },
+//     ],
+//   }
+// );
+
+// const subscription = await stripe.subscriptions.update(
+//   'sub_xxxxxxxxx',
+//   {
+//     items: [
+//       {
+//         id: '{{SUB_ITEM_ID}}',
+//         deleted: true,
+//       },
+//       {
+//         price: '{{NEW_PRICE_ID}}',
+//       },
+//     ],
+//   }
+// );
+
+//**********************HÄMTA SUBSCRIPTION ID*********************/
 async function getSubscriptionId(userId: string): Promise<string | null> {
   try {
     const db = await mysql.createConnection(dbConfig);
@@ -23,6 +60,27 @@ async function getSubscriptionId(userId: string): Promise<string | null> {
 
     if (rows.length > 0) {
       return rows[0].stripe_subscription_id;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching subscription ID:", error);
+    return null;
+  }
+}
+
+//**********************HÄMTA CUSTOMER ID*********************/
+async function getCustomerId(userId: string): Promise<string | null> {
+  try {
+    const db = await mysql.createConnection(dbConfig);
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT stripe_customer_id FROM subscriptions WHERE user_id = ?",
+      [userId]
+    );
+
+    if (rows.length > 0) {
+      console.log(rows[0].stripe_customer_id);
+      return rows[0].stripe_customer_id;
     } else {
       return null;
     }
@@ -222,28 +280,46 @@ router.post("/webhook", async (req, res) => {
 
 router.post("/upgrade-subscription", async (req, res) => {
   const { userId, newPriceId } = req.body;
+  console.log(`Upgrade request received for userId: ${userId}, newPriceId: ${newPriceId}`);
 
   try {
-    const subscriptionId = await getSubscriptionId(userId);
+    // Fetch the Customer ID from your database
+    const customerId = await getCustomerId(userId);
+    console.log(customerId);
 
-    if (!subscriptionId) {
-      return res.status(404).json({ error: "Subscription not found" });
+    if (!customerId) {
+      return res.status(404).json({ message: 'Customer not found' });
     }
 
-    // Hämta den aktuella prenumerationen
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    // List subscriptions for the customer
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+    });
+    console.log("här är våra subscriptions hoppar vi", subscriptions);
 
-    // Uppdatera prenumerationen med det nya pris-ID
+    // Find the subscription to update
+    let subscriptionToUpdate;
+    for (let subscription of subscriptions.data) {
+      if (subscription.items.data.some(item => item.price.id === subscription.items.data[0].price.id)) {
+        subscriptionToUpdate = subscription;
+        break;
+      }
+    }
+
+    if (!subscriptionToUpdate) {
+      return res.status(404).json({ message: 'Subscription not found' });
+    }
+
+    // Update the subscription with the new price
     const updatedSubscription = await stripe.subscriptions.update(
-      subscriptionId,
+      subscriptionToUpdate.id,
       {
         items: [
           {
-            id: subscription.items.data[0].id,
-            price: newPriceId,
-          },
-        ],
-        proration_behavior: "create_prorations", // För att hantera pro-rata debitering
+            id: subscriptionToUpdate.items.data[0].id,
+            price: newPriceId
+          }
+        ]
       }
     );
 
@@ -256,5 +332,6 @@ router.post("/upgrade-subscription", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 export default router;

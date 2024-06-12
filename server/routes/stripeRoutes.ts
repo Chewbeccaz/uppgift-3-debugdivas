@@ -145,54 +145,6 @@ router.post("/create-subscription-session", async (req, res) => {
   }
 });
 
-// router.get("/verify-subscription-session", async (req, res) => {
-//   const userId = req.query.userId as string;
-
-//   if (!userId) {
-//     return res.status(400).json({ error: "userId is required" });
-//   }
-
-//   try {
-//     const db = await mysql.createConnection(dbConfig);
-//     const [rows] = await db.query<RowDataPacket[]>(
-//       "SELECT stripe_session_id FROM payments WHERE user_id = ?",
-//       [userId]
-//     );
-
-//     if (rows.length === 0) {
-//       return res.status(404).json({ error: "Session not found" });
-//     }
-
-//     const sessionId = rows[0].stripe_session_id;
-//     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-//     if (session.payment_status === "paid") {
-//       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-
-//       // Hämta subscription och customer ID
-//       const subscriptionId = session.subscription;
-//       const customerId = session.customer;
-
-//       // Spara till databasen
-//       const insertQuery = `
-//         INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id)
-//         VALUES (?, ?, ?)
-//       `;
-//       const insertValues = [userId, subscriptionId, customerId];
-//       await db.query(insertQuery, insertValues);
-
-//       return res
-//         .status(200)
-//         .json({ verified: true, lineItems: lineItems.data, session });
-//     } else {
-//       return res.status(200).json({ verified: false, session });
-//     }
-//   } catch (error) {
-//     console.error("Error verifying subscription session:", error);
-//     return res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
-
 router.get("/verify-subscription-session", async (req, res) => {
   const userId = req.query.userId;
 
@@ -226,13 +178,12 @@ router.get("/verify-subscription-session", async (req, res) => {
       );
 
       if (subscriptionRows.length > 0) {
-        // Om prenumerationen redan finns, uppdatera status till active
         await db.query(
           "UPDATE subscriptions SET status = 'active' WHERE user_id = ?",
           [userId]
         );
       } else {
-        // Om prenumerationen inte finns, skapa en ny post med status active
+        // Om prenumerationen inte finns, skapa en ny post.
         const insertQuery = `
           INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, status)
           VALUES (?, ?, ?, 'active')

@@ -5,6 +5,11 @@ import { Ariel } from "../components/Ariel";
 import { Triton } from "../components/Triton";
 import axios from "axios";
 import "../styles/SubLevel.css";
+import { useNavigate } from "react-router-dom";
+import "../styles/modal.css";
+
+
+
 // import dotenv from "dotenv";
 // dotenv.config();
 // const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
@@ -14,6 +19,7 @@ export const SubLevel = () => {
   const { user } = useUser();
   const [subscriptionLevel, setSubscriptionLevel] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   //Detta är Nurs hårdkodade keys.
   const BLUNDER_KEY = "price_1POE5gDwCLdIkrpmfxhpiEiF";
@@ -46,12 +52,14 @@ export const SubLevel = () => {
         userId: user.userId,
         newPriceId: newPriceId,
       });
-      const { url } = response.data;
-      window.location.href = url;
-    } catch (error) {
-      console.error("Failed to upgrade subscription:", error);
-    } finally {
-      setLoading(false);
+
+      console.log(response.data);
+
+      navigate('/mypage', { state: { showModal: true } });
+      } catch (error) {
+        console.error("Failed to upgrade subscription:", error);
+        } finally {
+          setLoading(false);
     }
   };
 

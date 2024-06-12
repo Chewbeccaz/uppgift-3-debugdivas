@@ -99,3 +99,69 @@
   .cancel-btn:hover {
     background-color: #e67e22;
   }
+
+
+  .modal-overlay {
+    position: fixed;
+    top: 0px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #ffffff;
+    padding: 20px 20px 0px 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    max-height: 80%;
+    width: 100%;
+    overflow-y: auto;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .modal-content p {
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: black;
+  }
+  
+  .modal-content button {
+    background-color: #747264;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: auto;
+    margin-bottom: 25px;
+  }
+  
+  button:hover {
+    background-color: #3c3633;
+  }
+  
+  #modalknapp {
+    color: black;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  #modalknapp:hover {
+    text-decoration: none;
+  }
+
+  #modaltext {
+    font-size: 13px;
+  }

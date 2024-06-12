@@ -7,7 +7,6 @@ import { CustomSession } from "../models/CustomSession";
 import { initStripe } from "../stripe";
 import { RowDataPacket } from "mysql2/promise";
 
-
 const router = Router();
 
 router.use(
@@ -46,51 +45,81 @@ router.post("/create-user", async (req, res) => {
   }
 });
 
-
 //****************************** GET USERS SUBSCRIPTION ************************************/
-router.get('/subscription/:userId', async (req, res) => {
+
+//DUBBELKOLLA SÅ INTE DENNA PAJAR FÖR MYPAGE:
+
+router.get("/subscription/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
 
     const db = await mysql.createConnection(dbConfig);
 
     const [rows] = await db.query<RowDataPacket[]>(
-      'SELECT subscription_id FROM users WHERE _id = ?',
+      "SELECT subscription_id FROM users WHERE _id = ?",
       [userId]
     );
 
     if (rows.length > 0) {
       res.json({ subscriptionId: rows[0].subscription_id });
     } else {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Database query failed:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+//DUBBELKOLLA OM MAN KAN ÅTERANVÄNDA DENNA NEDAN FÖR ÄVEN MYPAGE.?
+router.get("/subscriptiondata/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const db = await mysql.createConnection(dbConfig);
+
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT u.subscription_id, s.status 
+       FROM users u
+       JOIN subscriptions s ON u._id = s.user_id
+       WHERE u._id = ?`,
+      [userId]
+    );
+
+    if (rows.length > 0) {
+      res.json({
+        subscriptionId: rows[0].subscription_id,
+        status: rows[0].status,
+      });
+    } else {
+      res.status(404).json({ error: "User not found" });
     }
 
     await db.end();
   } catch (error) {
-    console.error('Database query failed:', error);
-    res.status(500).send('Internal Server Error');
+    console.error("Database query failed:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
 /******************* delete  - CANCEL SUB: **********************/
-  //Just nu gör inte endpointen så mycket, då det är osäkert hur vi ska göra med databasen och stripe/webhook. Detta är bara en start 
-  
+//Just nu gör inte endpointen så mycket, då det är osäkert hur vi ska göra med databasen och stripe/webhook. Detta är bara en start
+
 router.delete("/cancel-subscription", async (req, res) => {
   const { userId } = req.body;
   try {
-      const db = await mysql.createConnection(dbConfig);
-      const query = `
+    const db = await mysql.createConnection(dbConfig);
+    const query = `
           DELETE FROM subscriptions
           WHERE user_id = ?
       `;
-      await db.query(query, [userId]);
-      res.status(200).json({ message: "Subscription canceled successfully" });
+    await db.query(query, [userId]);
+    res.status(200).json({ message: "Subscription canceled successfully" });
   } catch (error) {
-      console.error("Error canceling subscription:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error canceling subscription:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -147,8 +176,6 @@ router.get("/check-session", (req, res) => {
     res.status(200).json({ isLoggedIn: false });
   }
 });
-
-
 
 // Logout route
 router.post("/logout", (req, res) => {

@@ -12,26 +12,48 @@ const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
 const router = Router();
 const stripe = initStripe();
 
-//******************** Information till min sida ********************* 
+//**********************HÄMTA ANVÄNDARE*********************/
+async function getSubscriptionId(userId: string): Promise<string | null> {
+  try {
+    const db = await mysql.createConnection(dbConfig);
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT stripe_subscription_id FROM subscriptions WHERE user_id = ?",
+      [userId]
+    );
 
-router.get('/subscription-info', async (req, res) => {
+    if (rows.length > 0) {
+      return rows[0].stripe_subscription_id;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching subscription ID:", error);
+    return null;
+  }
+}
+
+//******************** Information till min sida *********************
+
+router.get("/subscription-info", async (req, res) => {
   const userId = req.query.userId as string | undefined;
-  
+
   if (!userId) {
-    return res.status(400).json({ error: 'userId is required' });
+    return res.status(400).json({ error: "userId is required" });
   }
 
   try {
     const subscriptionId = await getSubscriptionId(userId);
     if (!subscriptionId) {
-      return res.status(404).json({ error: 'Subscription not found' });
+      return res.status(404).json({ error: "Subscription not found" });
     }
 
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
     const { items, latest_invoice, current_period_end } = subscription;
     const priceId = items.data[0].price.id;
-    const product = await stripe.products.retrieve(items.data[0].price.product as string);
+    const product = await stripe.products.retrieve(
+      items.data[0].price.product as string
+    );
     const invoice = await stripe.invoices.retrieve(latest_invoice as string);
 
     res.status(200).json({
@@ -40,51 +62,40 @@ router.get('/subscription-info', async (req, res) => {
       nextPaymentDate: current_period_end,
     });
   } catch (error) {
-    console.error('Error fetching subscription info:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching subscription info:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 //******************* Cancel subscription ********************** */
 
-router.delete('/cancel-subscription', async (req, res) => {
+router.delete("/cancel-subscription", async (req, res) => {
   const { userId } = req.body;
   try {
     const subscriptionId = await getSubscriptionId(userId);
-    console.log(`Retrieved subscriptionId: ${subscriptionId} for userId: ${userId}`);
-    
-    if (!subscriptionId) {
-      return res.status(404).json({ error: 'Subscription not found' });
-    }
-
-    const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId);
-
-    res.status(200).json({ message: 'Subscription canceled successfully', canceledSubscription });
-  } catch (error) {
-    console.error('Error canceling subscription:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-async function getSubscriptionId(userId: string): Promise<string | null> {
-  try {
-    const db = await mysql.createConnection(dbConfig);
-    const [rows] = await db.query<RowDataPacket[]>(
-      'SELECT stripe_subscription_id FROM subscriptions WHERE user_id = ?',
-      [userId]
+    console.log(
+      `Retrieved subscriptionId: ${subscriptionId} for userId: ${userId}`
     );
 
-    if (rows.length > 0) {
-      return rows[0].stripe_subscription_id; 
-    } else {
-      return null; 
+    if (!subscriptionId) {
+      return res.status(404).json({ error: "Subscription not found" });
     }
+
+    const canceledSubscription = await stripe.subscriptions.cancel(
+      subscriptionId
+    );
+
+    res
+      .status(200)
+      .json({
+        message: "Subscription canceled successfully",
+        canceledSubscription,
+      });
   } catch (error) {
-    console.error('Error fetching subscription ID:', error);
-    return null;
+    console.error("Error canceling subscription:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-}
+});
 
 router.post("/create-subscription-session", async (req, res) => {
   const { userId } = req.body;
@@ -199,59 +210,42 @@ router.post("/webhook", async (req, res) => {
 });
 
 //*****************************************UPPGRADERA  */
-router.post('/upgrade-subscription', async (req, res) => {
-  const { userId, priceId } = req.body;
-  console.log('Received request to upgrade subscription:', req.body);
+
+router.post("/upgrade-subscription", async (req, res) => {
+  const { userId, newPriceId } = req.body;
 
   try {
-    // Koppla till databasen
-    const connection = await mysql.createConnection(dbConfig);
+    const subscriptionId = await getSubscriptionId(userId);
 
-    // Hämta stripe_customer_id från subscriptions-tabellen baserat på userId
+    if (!subscriptionId) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
 
-    const [rows] = await connection.execute<mysql.RowDataPacket[]>(
-      'SELECT stripe_subscription_id FROM subscriptions WHERE user_id = ?',
-      [userId]
+    // Hämta den aktuella prenumerationen
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    // Uppdatera prenumerationen med det nya pris-ID
+    const updatedSubscription = await stripe.subscriptions.update(
+      subscriptionId,
+      {
+        items: [
+          {
+            id: subscription.items.data[0].id,
+            price: newPriceId,
+          },
+        ],
+        proration_behavior: "create_prorations", // För att hantera pro-rata debitering
+      }
     );
 
-    const stripeSubscriptionId = rows[0].stripe_subscription_id;
-    console.log('Fetched stripe_customer_id:', stripeSubscriptionId);
-
-    // Hämta användarens prenumerationer från Stripe
-    const subscriptions = await stripe.subscriptions.list({
-      customer: stripeSubscriptionId,
+    res.json({
+      message: "Subscription upgraded successfully",
+      updatedSubscription,
     });
-
-    const subscription = subscriptions.data[0]; // Antag att det finns bara en prenumeration
-
-    if (subscription) {
-      // Uppdatera prenumerationen med nytt pris-id
-      const updatedSubscription = await stripe.subscriptions.update(
-        subscription.id,
-        {
-          items: [
-            {
-              id: subscription.items.data[0].id, // Behåll existerande item-id
-              price: priceId, // Nytt pris-id
-            },
-          ],
-        }
-      );
-
-      console.log('Updated subscription:', updatedSubscription);
-
-      res.json({ updatedSubscription });
-    } else {
-      console.error('No subscription found for user');
-      res.status(400).json({ error: 'No subscription found for user' });
-    }
   } catch (error) {
-    console.error('Error upgrading subscription:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Failed to upgrade subscription:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
 
 export default router;

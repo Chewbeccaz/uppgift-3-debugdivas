@@ -79,16 +79,17 @@ export const MyPage = () => {
                   <SubExpired /> 
                 ) : (
                   <div>
-                    <h4>Prenumerationsnivå: {subscriptionInfo.subscriptionLevel}</h4>
+                    <h4>Prenumerationsnivå: <br />{subscriptionInfo.subscriptionLevel}</h4>
                     <p>Senaste betalning: {new Date(subscriptionInfo.lastPaymentDate * 1000).toLocaleDateString()}</p>
                     <p>Nästa betalning: {new Date(subscriptionInfo.nextPaymentDate * 1000).toLocaleDateString()}</p>
                     {subscriptionInfo.status === 'canceled_at_period_end' && (
                       <p>Prenumerationen kommer att avslutas vid periodens slut.</p>
                     )}
                     {message && <p>{message}</p>}
-                    <button>Uppgradera??</button>
+<br />
                     {subscriptionInfo.status !== 'canceled_at_period_end' && (
-                      <button className="cancel-btn" onClick={cancelSubscription}>Cancel Subscription</button>
+                    
+                      <button className="cancel-btn" onClick={cancelSubscription}>Avsluta prenumeration</button>
                     )}
                   </div>
                 )}

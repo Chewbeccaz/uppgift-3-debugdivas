@@ -429,10 +429,42 @@ router.post("/webhook", async (req, res) => {
         break;
       }
 
+      case "customer.subscription.deleted":
+        console.log("customer avbryter subscription")
+        //Uppdatera databasen. 
+        //Hämta Sub-id och sätt in i db. Sätt expired. 
+
+        const subscription = event.data.object;
+        const subscriptionId = subscription.id;
+        console.log(subscriptionId)
+
+        const [rows] = await db.query<RowDataPacket[]>(
+          "SELECT user_id FROM subscriptions WHERE stripe_subscription_id = ?",
+          [subscriptionId]
+        );
+
+        if (rows.length > 0) {
+          const userId = rows[0].user_id;
+
+          await db.query(
+            "UPDATE subscriptions SET status = 'expired' WHERE user_id = ?",
+            [userId]
+          );
+
+          console.log(`Updated status to 'expired' for user ${userId}`);
+        } else {
+          console.log(`No user found with subscription ID ${subscriptionId}`);
+        }
+      
+
+        break; 
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
         break;
     }
+
+   
 
     res.json({ received: true });
   } catch (error) {

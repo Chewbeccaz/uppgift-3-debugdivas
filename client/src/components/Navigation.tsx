@@ -4,28 +4,32 @@ import { IoHomeOutline } from "react-icons/io5";
 import { IoMdPersonAdd } from "react-icons/io";
 import { IoPerson } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext";
+import { Login } from "./Login";
 
 export const Navigation = () => {
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { user, logout } = useUser();
-  // const navigate = useNavigate();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     console.log("Navigation re-rendered, user:", user);
+    if (user) {
+      setShowDropdown(false);
+    }
   }, [user]);
 
   const handleLoginLogout = async () => {
     if (user) {
       try {
         await logout();
-        // navigate("/");
       } catch {
         console.error("Logout failed:", Error);
       }
     } else {
-      window.location.href = "/login"; //Byt till Home, eller MyPages sen.
+      // window.location.href = "/login";
+      // setShowDropdown(!showDropdown);
+      setShowDropdown((prev) => !prev);
     }
   };
 
@@ -58,6 +62,11 @@ export const Navigation = () => {
               {user ? <CiLogout /> : <CiLogin />}
             </NavLink>
           </li>
+          {showDropdown && !user && (
+            <div className="dropdown-menu">
+              <Login />
+            </div>
+          )}
         </div>
       </div>
     </nav>

@@ -1,53 +1,8 @@
-/* FLytta till index.css och städa upp sen. */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-/* 
-nav {
-  background-color: #333;
-  padding: 10px 20px;
-  opacity: 0.8;
-}
-
-nav ul {
-  list-style: none;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-nav ul li {
-  margin: 0 15px;
-}
-
-nav ul li a {
-  text-decoration: none;
-  color: #fff;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-}
-
-nav ul li a:hover {
-  color: rgba(255, 255, 255, 0.684);
-}
-
-nav ul li a svg {
-  margin-right: 8px;
-}
-
-@media (max-width: 600px) {
-  nav ul {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  nav ul li {
-    margin: 10px 0;
-  }
-} */
 
 nav {
   background-color: #272626;
@@ -55,32 +10,32 @@ nav {
   opacity: 0.8;
 }
 
-/* Container for nav elements */
+
 .nav-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* Left-aligned elements */
+
 .nav-left {
   display: flex;
   list-style: none;
 }
 
-/* Right-aligned elements */
+
 .nav-right {
   display: flex;
   list-style: none;
 }
 
-/* List items styling */
+
 .nav-left li,
 .nav-right li {
   margin: 0 15px;
 }
 
-/* Links styling */
+
 .nav-left li a,
 .nav-right li a {
   text-decoration: none;
@@ -90,19 +45,19 @@ nav {
   align-items: center;
 }
 
-/* Hover effect */
+
 .nav-left li a:hover,
 .nav-right li a:hover {
   color: rgba(255, 255, 255, 0.684);
 }
 
-/* Adjust icon margin */
+
 .nav-left li a svg,
 .nav-right li a svg {
   margin-right: 8px;
 }
 
-/* Responsive design */
+
 @media (max-width: 600px) {
   .nav-container {
     flex-direction: column;

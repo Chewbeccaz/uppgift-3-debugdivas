@@ -31,7 +31,7 @@ export const Plan = () => {
       <div className="plan-box 3">
         <div className="top-box">
           <img src={triton} alt="triton" />
-          <h2>TRITIONS <br />TREUDD</h2>
+          <h2>TRITONS <br />TREUDD</h2>
           <h3>För dig som är redo att finkamma havsbotten med oss</h3>
         </div>
         <Link to="/signup">

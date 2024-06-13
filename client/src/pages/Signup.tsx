@@ -9,7 +9,8 @@ import "../styles/signup.css";
 export const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [subscriptionId, setSubscriptionId] = useState(1);
+  // const [subscriptionId, setSubscriptionId] = useState(1);
+  const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionLevels[]>([]);
   const [message, setMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,7 +24,13 @@ export const Signup = () => {
     const fetchSubscriptions = async () => {
       try {
         const response = await axios.get<SubscriptionLevels[]>("/api/levels");
-        setSubscriptions(response.data);
+        const fetchedSubscriptions = response.data;
+        setSubscriptions(fetchedSubscriptions);
+
+        if (fetchedSubscriptions.length > 0) {
+          setSubscriptionId(fetchedSubscriptions[0]._id); 
+        }
+        console.log("Fetched subscriptions:", fetchedSubscriptions);
       } catch (error) {
         console.error("Error fetching subscriptions:", error);
       }
@@ -145,7 +152,7 @@ export const Signup = () => {
             Prenumeration:
             <select
               name="subscription_id"
-              value={subscriptionId}
+              value={subscriptionId ?? ""}
               onChange={(e) => setSubscriptionId(Number(e.target.value))}
               disabled={accountCreated}
             >

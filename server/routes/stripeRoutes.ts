@@ -19,7 +19,7 @@ const getPriceId = (subscriptionId:Number) => {
     case 3:
       return ARIEL_KEY;
     case 4:
-      return ARIEL_KEY;
+      return TRITION_KEY;
     default:
       return "";
   }

@@ -327,9 +327,6 @@ router.get("/verify-subscription-session", async (req, res) => {
 //      } else if(event.type === "payment_intent.succeeded") {
 
 //      }
-    
-
-
 
 //     else {
 //       console.log(`Unhandled event type: ${event.type}`);
@@ -360,7 +357,7 @@ router.post("/webhook", async (req, res) => {
 
         if (rows.length > 0) {
           const userId = rows[0].user_id;
-          let newStatus = '';
+          let newStatus = "";
 
           switch (status) {
             case "past_due":
@@ -393,7 +390,7 @@ router.post("/webhook", async (req, res) => {
         // Hantera "payment_intent.succeeded" event
         console.log("Payment intent succeeded");
 
-         const paymentIntent = event.data.object;
+        const paymentIntent = event.data.object;
         const invoiceId = paymentIntent.invoice;
 
         if (!invoiceId) {
@@ -430,13 +427,13 @@ router.post("/webhook", async (req, res) => {
       }
 
       case "customer.subscription.deleted":
-        console.log("customer avbryter subscription")
-        //Uppdatera databasen. 
-        //Hämta Sub-id och sätt in i db. Sätt expired. 
+        console.log("customer avbryter subscription");
+        //Uppdatera databasen.
+        //Hämta Sub-id och sätt in i db. Sätt expired.
 
         const subscription = event.data.object;
         const subscriptionId = subscription.id;
-        console.log(subscriptionId)
+        console.log(subscriptionId);
 
         const [rows] = await db.query<RowDataPacket[]>(
           "SELECT user_id FROM subscriptions WHERE stripe_subscription_id = ?",
@@ -451,20 +448,23 @@ router.post("/webhook", async (req, res) => {
             [userId]
           );
 
-          console.log(`Updated status to 'expired' for user ${userId}`);
+          await db.query("UPDATE users SET subscription_id = 1 WHERE _id = ?", [
+            userId,
+          ]);
+
+          console.log(
+            `Updated status to 'expired' and subscription_id to 1 for user ${userId}`
+          );
         } else {
           console.log(`No user found with subscription ID ${subscriptionId}`);
         }
-      
 
-        break; 
+        break;
 
       default:
         console.log(`Unhandled event type: ${event.type}`);
         break;
     }
-
-   
 
     res.json({ received: true });
   } catch (error) {
@@ -472,9 +472,6 @@ router.post("/webhook", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
 
 //******************FÖRNYA SUBSCRIPTION: *****//////////////
 router.get("/generate-invoice-link", async (req, res) => {
@@ -492,7 +489,7 @@ router.get("/generate-invoice-link", async (req, res) => {
       return res.status(404).json({ error: "Customer not found" });
     }
     console.log("subId", subId);
-  
+
     let subscription = await stripe.subscriptions.retrieve(subId);
     console.log("subscription", subscription);
     let invoiceId = subscription.latest_invoice;
@@ -500,14 +497,11 @@ router.get("/generate-invoice-link", async (req, res) => {
     console.log("invoice", invoice);
     let invoiceUrl = invoice.hosted_invoice_url;
     res.json({ invoiceUrl });
-    
   } catch (error) {
     console.error("Error generating and sending invoice:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  } 
+  }
 });
-
-
 
 //*****************************************UPPGRADERA  */
 
@@ -568,8 +562,4 @@ router.post("/upgrade-subscription", async (req, res) => {
   }
 });
 
-
-
-
 export default router;
-

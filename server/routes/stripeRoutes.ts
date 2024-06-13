@@ -509,5 +509,67 @@ router.get("/generate-invoice-link", async (req, res) => {
 
 
 
+//*****************************************UPPGRADERA  */
+
+router.post("/upgrade-subscription", async (req, res) => {
+  const { userId, newPriceId } = req.body;
+  console.log(
+    `Upgrade request received for userId: ${userId}, newPriceId: ${newPriceId}`
+  );
+
+  try {
+    const customerId = await getCustomerId(userId);
+    console.log(customerId);
+
+    if (!customerId) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+    });
+    console.log("här är våra subscriptions hoppar vi", subscriptions);
+
+    let subscriptionToUpdate;
+    for (let subscription of subscriptions.data) {
+      if (
+        subscription.items.data.some(
+          (item) => item.price.id === subscription.items.data[0].price.id
+        )
+      ) {
+        subscriptionToUpdate = subscription;
+        break;
+      }
+    }
+
+    if (!subscriptionToUpdate) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+
+    const updatedSubscription = await stripe.subscriptions.update(
+      subscriptionToUpdate.id,
+      {
+        items: [
+          {
+            id: subscriptionToUpdate.items.data[0].id,
+            price: newPriceId,
+          },
+        ],
+      }
+    );
+
+    res.json({
+      message: "Subscription upgraded successfully",
+      updatedSubscription,
+    });
+  } catch (error) {
+    console.error("Failed to upgrade subscription:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
 export default router;
 

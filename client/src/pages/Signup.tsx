@@ -3,8 +3,7 @@ import axios from "axios";
 import { SubscriptionLevels } from "../models/SubscriptionLevels";
 import Modal from "../components/modal/Modal";
 import PrivacyPolicy from "../components/modal/PrivacyPolicy";
-import "../styles/modal.css";
-
+import "../styles/signup.css";
 
 export const Signup = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +13,7 @@ export const Signup = () => {
   const [message, setMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null); //Borde detta ligga som ett globalt state i context?
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchSubscriptions = async () => {
@@ -57,18 +56,6 @@ export const Signup = () => {
     }
   };
 
-  // const handleSubPayment = async () => {
-  //   try {
-  //     const response = await axios.post(
-  //       "/api/stripe/create-subscription-session"
-  //     );
-  //     const { url } = response.data;
-  //     window.location.href = url;
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
-
   const handleSubPayment = async () => {
     if (userId === null) {
       alert("skapa ett konto först");
@@ -91,70 +78,73 @@ export const Signup = () => {
   };
 
   return (
-    <>
-      <h1>Skapa konto</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Lösenord:
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Prenumeration:
-          <select
-            name="subscription_id"
-            value={subscriptionId}
-            onChange={(e) => setSubscriptionId(Number(e.target.value))}>
-            {subscriptions.map((subscription) => (
-              <option key={subscription._id} value={subscription._id}>
-                {subscription.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={isChecked}
-            onChange={(e) => setIsChecked(e.target.checked)}
-          />
-          Jag accepterar villkoren
-        </label>
-        <br />
-        <button type="submit">Skapa konto</button>
-        <p id="modaltext">
+    <div className="signup-wrapper">
+      <div className="signup-container">
+        <h1>Skapa konto</h1>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Email:
+            <input
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
           <br />
-          Genom att klicka på 'Skapa konto' godkänner du lagring av dina
-          personuppgifter.
+          <label>
+            Lösenord:
+            <input
+              type="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
           <br />
-          Du kan läsa mer genom att klicka{" "}
-          <a id="modalknapp" onClick={() => setIsModalOpen(true)}>
-            här
-          </a>
-          .
-        </p>
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <PrivacyPolicy />
-        </Modal>
-        {message && <p>{message}</p>}
-      </form>
-      <button onClick={handleSubPayment}>Testknappen</button>
-    </>
+          <label>
+            Prenumeration:
+            <select
+              name="subscription_id"
+              value={subscriptionId}
+              onChange={(e) => setSubscriptionId(Number(e.target.value))}
+            >
+              {subscriptions.map((subscription) => (
+                <option key={subscription._id} value={subscription._id}>
+                  {subscription.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <br />
+          <label>
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={(e) => setIsChecked(e.target.checked)}
+            />
+            Jag accepterar villkoren
+          </label>
+          <br />
+          <button type="submit">Skapa konto</button>
+          <p id="modaltext">
+            <br />
+            Genom att klicka på 'Skapa konto' godkänner du lagring av dina
+            personuppgifter.
+            <br />
+            Du kan läsa mer genom att klicka{" "}
+            <a id="modalknapp" onClick={() => setIsModalOpen(true)}>
+              här
+            </a>
+            .
+          </p>
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <PrivacyPolicy />
+          </Modal>
+          {message && <p>{message}</p>}
+        </form>
+        <button onClick={handleSubPayment}>Testknappen</button>
+      </div>
+    </div>
   );
 };

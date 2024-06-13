@@ -58,7 +58,6 @@
 //     </>
 //   );
 // };
-
 import { useState } from "react";
 import { useUser } from "../context/UserContext";
 import '../styles/login.css';
@@ -80,31 +79,32 @@ export const Login = () => {
   };
 
   return (
-    <>
-
-      <form onSubmit={handleLogin}>
-        <label>
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Password:
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        <br />
-        <button type="submit">Login</button>
-      </form>
-    </>
+    <div className="login-wrapper">
+      <div className="login-container">
+        <form onSubmit={handleLogin}>
+          <label>
+            Email:
+            <input
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <br />
+          <label>
+            Password:
+            <input
+              type="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <br />
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </div>
   );
 };

@@ -1,48 +1,9 @@
-// import { useEffect, useState } from "react";
-// import { useLocation } from "react-router-dom";
-// import axios from "axios";
-
-// export const Confirmation = () => {
-//   const [message, setMessage] = useState("Verifying payment...");
-//   const location = useLocation();
-
-//   const handleVerifySession = async (sessionId: string) => {
-//     try {
-//       const response = await axios.get(
-//         `/api/stripe/verify-subscription-session?sessionId=${sessionId}`
-//       );
-//       const { verified } = response.data;
-//       if (verified) {
-//         setMessage("Payment confirmed! Thank you for your purchase.");
-//       } else {
-//         setMessage("Payment verification failed. Please contact support.");
-//       }
-//     } catch (error) {
-//       console.error("Error verifying subscription session:", error);
-//       setMessage(
-//         "An error occurred during payment verification. Please try again later."
-//       );
-//     }
-//   };
-
-//   useEffect(() => {
-//     const query = new URLSearchParams(location.search);
-//     const sessionId = query.get("session_id");
-//     if (sessionId) {
-//       handleVerifySession(sessionId);
-//     } else {
-//       setMessage("No session ID found. Please try again.");
-//     }
-//   }, [location]);
-
-//   return (
-//     <>
-//       <h2>Confirmation page 🎉</h2>
-//     </>
-//   );
-// };
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Confetti from "react-confetti";
+import '../styles/confirmation.css';
+import { Link } from "react-router-dom";
+
 
 interface LineItem {
   description: string;
@@ -54,6 +15,10 @@ export const Confirmation = () => {
   const [verified, setVerified] = useState(false);
   const [message, setMessage] = useState("");
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(true); // State för att visa/dölja bekräftelse-rutan
 
   useEffect(() => {
     const verifySession = async () => {
@@ -81,6 +46,8 @@ export const Confirmation = () => {
           setVerified(true);
           setLineItems(response.data.lineItems);
           setMessage("Betalningen är bekräftad!");
+          setShowConfetti(true); // Visa confetti när betalningen är bekräftad
+          setTimeout(() => setShowConfetti(false), 3000); // Stoppa confetti efter 3 sekunder
         } else {
           setMessage("Betalningen kunde inte verifieras.");
         }
@@ -91,26 +58,46 @@ export const Confirmation = () => {
     };
 
     verifySession();
+
+    // Update window dimensions
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleCloseConfirmation = () => {
+    setShowConfirmation(false);
+  };
+
   return (
-    <div>
-      <h1>Betalningsbekräftelse</h1>
-      <p>{message}</p>
-      {verified && (
-        <div>
-          <h2>Detaljer om betalning:</h2>
-          <ul>
-            {lineItems.map((item, index) => (
-              <li key={index}>
-                {item.description} - {item.amount_total / 100}{" "}
-                {item.currency.toUpperCase()}
-              </li>
-            ))}
-          </ul>
+    <>
+      {showConfirmation && (
+        <div className={`confirmation-container ${verified ? 'verified' : 'error'}`}>
+          <Link to="/login" className="buy"> <button className="close-button" onClick={handleCloseConfirmation}>Gå vidare</button></Link>
+          
+          {showConfetti && <Confetti width={windowWidth} height={windowHeight} />}
+          <h1>Betalningsbekräftelse</h1>
+          <p>{message}</p>
+          {verified && (
+            <div>
+              <h2>Detaljer om betalning:</h2>
+              <ul>
+                {lineItems.map((item, index) => (
+                  <li key={index}>
+                    {item.description} - {item.amount_total / 100}{" "}
+                    {item.currency.toUpperCase()}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

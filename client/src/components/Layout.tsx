@@ -9,7 +9,7 @@ export const Layout = () => {
       <header>
         <Header />
       </header>
-      <main>
+      <main style={{height: "auto"}}>
         <Outlet />
       </main>
       <footer>

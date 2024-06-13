@@ -80,7 +80,6 @@ export const Admin = () => {
         </div>
         <button type="submit">Create Article</button>
       </form>
-      <Plan />
     </>
   );
 };

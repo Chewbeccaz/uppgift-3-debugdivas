@@ -16,9 +16,8 @@ export const UpgradeConfirm = () => {
         <>
             {subscriptionInfo ?
                 <p>
-                    Grattis till din nya prenumeration!
+                    Grattis till din nya prenumeration! 
                     <br />
-                    Nu har tillgång till {subscriptionInfo.subscriptionLevel} 
                 </p>
                 : null}
         </>

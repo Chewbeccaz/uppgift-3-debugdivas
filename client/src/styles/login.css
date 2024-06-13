@@ -1,22 +1,50 @@
-.login-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 70vh;
-  }
-  
-  /* Flex-grow 1 gör att denna del tar upp all ledig plats */
-  .login-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Centrerar innehållet vertikalt */
-    align-items: center; /* Centrerar innehållet horisontellt */
-  }
-  
-  /* Footer längst ner */
-  .footer {
-    background-color: #f1f1f1;
-    padding: 10px;
-    text-align: center;
-  }
-  
+.nav-right {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background-color: #272626; 
+  border: 1px solid rgba(204, 204, 204, 0.7);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000;
+  width: 250px;
+  max-height: 200px; 
+  overflow-y: auto; 
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form form {
+  background-color: transparent;
+  margin: 0;
+}
+
+.login-form .form-group {
+  margin-bottom: 5px; 
+}
+
+.form-group label {
+  color: white; 
+}
+
+.login-form input {
+  width: 100%;
+  padding: 4px;
+  box-sizing: border-box;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.login-form button {
+  padding: 6px;
+  box-sizing: border-box;
+  font-size: 12px;
+  background-color: #e67e22;
+}

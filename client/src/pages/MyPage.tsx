@@ -3,7 +3,7 @@ import { Login } from '../components/Login';
 import { useUser } from '../context/UserContext';
 import axios from 'axios';
 import "../styles/mypage.css";
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom';
 import ModalConfirm from '../components/modal/ModalConfirm';
 import UpgradeConfirm from "../components/modal/UpgradeConfirm";
 import "../styles/modal.css";
@@ -24,7 +24,7 @@ export const MyPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const showModal = location.state?.showModal || false;
-  
+
   useEffect(() => {
     if (showModal) {
       setIsModalOpen(true);
@@ -48,6 +48,14 @@ export const MyPage = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (subscriptionInfo && subscriptionInfo.status === 'canceled_at_period_end') {
+      setMessage('Prenumerationen kommer att avslutas vid periodens slut.');
+    } else {
+      setMessage('');
+    }
+  }, [subscriptionInfo]);
+
   const cancelSubscription = async () => {
     if (user) {
       try {
@@ -56,7 +64,6 @@ export const MyPage = () => {
         });
         console.log('Response from cancel-subscription:', response);
         if (response.status === 200) {
-          setMessage('Prenumerationen kommer att avslutas vid periodens slut.');
           setSubscriptionInfo((prevInfo) => prevInfo ? { ...prevInfo, status: 'canceled_at_period_end' } : null);
         } else {
           setMessage('Kunde inte avsluta prenumerationen, försök igen.');
@@ -66,7 +73,6 @@ export const MyPage = () => {
       }
     }
   };
-  
 
   return (
     <div className="container-mypage">
@@ -76,19 +82,15 @@ export const MyPage = () => {
             {subscriptionInfo ? (
               <div>
                 {subscriptionInfo.status === 'expired' ? (
-                  <SubExpired /> 
+                  <SubExpired />
                 ) : (
                   <div>
                     <h4>Prenumerationsnivå: <br />{subscriptionInfo.subscriptionLevel}</h4>
                     <p>Senaste betalning: {new Date(subscriptionInfo.lastPaymentDate * 1000).toLocaleDateString()}</p>
                     <p>Nästa betalning: {new Date(subscriptionInfo.nextPaymentDate * 1000).toLocaleDateString()}</p>
-                    {subscriptionInfo.status === 'canceled_at_period_end' && (
-                      <p>Prenumerationen kommer att avslutas vid periodens slut.</p>
-                    )}
                     {message && <p>{message}</p>}
-<br />
+                    <br />
                     {subscriptionInfo.status !== 'canceled_at_period_end' && (
-                    
                       <button className="cancel-btn" onClick={cancelSubscription}>Avsluta prenumeration</button>
                     )}
                   </div>

@@ -110,11 +110,24 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error("Login failed:", error);
-      setUser(undefined);
-      setIsAuthenticated(false);
+  console.error("Login failed:", error);
+  if (axios.isAxiosError(error) && error.response) {
+    // Om felet kommer från Axios och svaret innehåller felinformation
+    setErrorMessage(error.response.data.message || "An error occurred");
+  } else {
+    // Generellt felhantering
+    setErrorMessage("An error occurred");
+  }
+  setUser(undefined);
+  setIsAuthenticated(false);
+}
     }
-  };
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //     setUser(undefined);
+  //     setIsAuthenticated(false);
+  //   }
+  // };
 
   //TODO ***************** LÄGG TILL LOGOUT  HÄR*****************//
   const logout = async () => {

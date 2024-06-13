@@ -1,20 +1,43 @@
 .signup-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  .signup-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .footer {
-    background-color: #f1f1f1;
-    padding: 10px;
-    text-align: center;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.signup-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer {
+  background-color: #f1f1f1;
+  padding: 10px;
+  text-align: center;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  width: 300px; /* Ensures the input container takes full width */
+  max-width: 400px; /* Optional: limits the maximum width */
+  justify-content: center; /* Aligns input fields to the center */
+}
+
+.input-container label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns label text to the left */
+  margin-bottom: 10px; /* Adds space between fields */
+  width: 100%;
+}
+
+.input-container input,
+.input-container select {
+  width: 100%; /* Ensures input and select elements take full width */
+  padding: 8px; /* Adds padding for better readability */
+  margin-top: 5px; /* Adds space between label text and input field */
+  box-sizing: border-box; /* Ensures padding doesn't affect overall width */
+}

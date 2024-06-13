@@ -80,8 +80,8 @@ export const Signup = () => {
   return (
     <div className="signup-wrapper">
       <div className="signup-container">
-        <h1>Skapa konto</h1>
         <form onSubmit={handleSubmit}>
+          <div className="input-container">
           <label>
             Email:
             <input
@@ -101,6 +101,7 @@ export const Signup = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
+          </div>
           <br />
           <label>
             Prenumeration:
@@ -123,7 +124,7 @@ export const Signup = () => {
               checked={isChecked}
               onChange={(e) => setIsChecked(e.target.checked)}
             />
-            Jag accepterar villkoren
+              Jag accepterar villkoren
           </label>
           <br />
           <button type="submit">Skapa konto</button>

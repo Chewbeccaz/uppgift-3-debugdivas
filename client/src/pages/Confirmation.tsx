@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Confetti from "react-confetti";
 import '../styles/confirmation.css';
-import { Link } from "react-router-dom";
 
 
 interface LineItem {
@@ -18,7 +17,6 @@ export const Confirmation = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(true); // State för att visa/dölja bekräftelse-rutan
 
   useEffect(() => {
     const verifySession = async () => {
@@ -69,36 +67,34 @@ export const Confirmation = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleCloseConfirmation = () => {
-    setShowConfirmation(false);
-  };
+
 
   return (
-    <>
-      {showConfirmation && (
-        <div className={`confirmation-container ${verified ? 'verified' : 'error'}`}>
-          <Link to="/login" className="buy"> <button className="close-button" onClick={handleCloseConfirmation}>Gå vidare</button></Link>
-          
-          {showConfetti && <Confetti width={windowWidth} height={windowHeight} />}
-          <h1>Betalningsbekräftelse</h1>
-          <p>{message}</p>
-          {verified && (
-            <div>
-              <h2>Detaljer om betalning:</h2>
-              <ul>
-                {lineItems.map((item, index) => (
-                  <li key={index}>
-                    {item.description} - {item.amount_total / 100}{" "}
-                    {item.currency.toUpperCase()}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-    </>
-  );
-};
+      <>
+        
+          <div className={`confirmation-container ${verified ? 'verified' : 'error'}`}>
+            
+            
+            {showConfetti && <Confetti width={windowWidth} height={windowHeight} />}
+            <h1>Betalningsbekräftelse</h1>
+            <p>{message}</p>
+            {verified && (
+              <div>
+                <h2>Detaljer om betalning:</h2>
+                <ul>
+                  {lineItems.map((item, index) => (
+                    <li key={index}>
+                      {item.description} - {item.amount_total / 100}{" "}
+                      {item.currency.toUpperCase()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        
+      </>
+    );
+  };
 
 export default Confirmation;

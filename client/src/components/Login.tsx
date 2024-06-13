@@ -6,7 +6,7 @@ export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useUser();
-
+ 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -17,7 +17,7 @@ export const Login = () => {
     setEmail("");
     setPassword("");
   };
-
+ 
   return (
     <div className="login-form">
       <form onSubmit={handleLogin}>

@@ -1,0 +1,82 @@
+/* Basic container styling */
+.confirmation-container {
+    background-color: #f0f4f8;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 50px auto;
+    font-family: "Montserrat", sans-serif;
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Header styling */
+  .confirmation-container h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* Message styling */
+  .confirmation-container p {
+    font-size: 1.2em;
+    color: #555;
+  }
+  
+  /* Payment details styling */
+  .confirmation-container h2 {
+    font-size: 1em;
+    color: #000000;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-weight: lighter;
+  }
+  
+  /* List of line items */
+  .confirmation-container ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+  }
+  
+  .confirmation-container li {
+    background-color: #fff;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 1.1em;
+    color: #333;
+  }
+  
+  /* Specific styling for verified message */
+  .confirmation-container.verified p {
+    color: #28a745;
+    font-weight: bold;
+  }
+  
+  /* Specific styling for error or unverified message */
+  .confirmation-container.error p {
+    color: #dc3545;
+    font-weight: bold;
+  }
+  
+  /* Adding some animation to the container */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .confirmation-container {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  
+  

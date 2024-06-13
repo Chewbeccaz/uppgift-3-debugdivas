@@ -1,67 +1,51 @@
-//  interface NoAccessProps {
-//      handleUpgrade: (newPriceId: string) => Promise<void>;
-//      priceId: string;
-//      loading: boolean;
-//    }
-
+import { useEffect, useState } from "react";
+import { useUser } from "../context/UserContext";
 import Payment from "./Payment";
-
+import axios from "axios";
 
 export const NoAccess = () => {
+  const { user } = useUser();
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
+    null
+  );
 
+  useEffect(() => {
+    if (user) {
+      checkSubscriptionStatus(user.userId);
+    }
+  }, [user]);
+
+  const checkSubscriptionStatus = async (userId: string) => {
+    try {
+      const response = await axios.get(`/api/users/subscriptiondata/${userId}`);
+      setSubscriptionStatus(response.data.status);
+    } catch (error) {
+      console.error("Failed to fetch subscription status:", error);
+    }
+  };
 
   return (
     <div className="restricted-content">
       <div className="overlay">
-        <p>
-          Du har inte tillgång till prenumerationsinnehållet. Vänligen starta en
-          ny eller återuppta din gamla prenumeration.
-        </p>
-        <Payment/>
+        {subscriptionStatus === "expired" ? (
+          <>
+            <h2>Din prenumeration har tyvärr löpt ut.</h2>
+            <p>
+              <br></br>Vänligen kontakta kundtjänst
+              <br></br>Email: info@havsnyheter.se
+              <br></br>Telefon: 123-456-789
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Du har inte tillgång till prenumerationsinnehållet. Vänligen
+              starta en ny eller återuppta din gamla prenumeration.
+            </p>
+            <Payment />
+          </>
+        )}
       </div>
     </div>
   );
 };
-
-// import { useState } from "react";
-// import { useUser } from "../context/UserContext";
-// import axios from "axios";
-// // import "../styles/NoAccess.css";
-
-// export const NoAccess = () => {
-//   const { user } = useUser();
-//   const [loading, setLoading] = useState(false);
-
-//   const handleRenewSubscription = async () => {
-//     if (!user) return;
-
-//     setLoading(true);
-
-//     try {
-//       const response = await axios.post(
-//         "/api/stripe/create-billing-portal-session",
-//         {
-//           userId: user.userId,
-//         }
-//       );
-
-//       window.location.href = response.data.url;
-//     } catch (error) {
-//       console.error("Error creating billing portal session:", error);
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="no-access">
-//       <h2>Ingen åtkomst</h2>
-//       <p>
-//         Du har för närvarande inte åtkomst till detta innehåll. Vänligen
-//         återuppta din prenumeration för att få åtkomst.
-//       </p>
-//       <button onClick={handleRenewSubscription} disabled={loading}>
-//         {loading ? "Laddar..." : "Återuppta prenumeration"}
-//       </button>
-//     </div>
-//   );
-// };

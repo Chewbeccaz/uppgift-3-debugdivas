@@ -9,6 +9,8 @@
     font-family: "Montserrat", sans-serif;
     text-align: center;
     color: #333;
+    margin-top: 20vh;
+    margin-bottom: 15vh;
   }
   
   /* Header styling */
@@ -61,22 +63,7 @@
     color: #dc3545;
     font-weight: bold;
   }
-  
-  /* Adding some animation to the container */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .confirmation-container {
-    animation: fadeIn 0.5s ease-in-out;
-  }
+
 
   
   

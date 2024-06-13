@@ -121,15 +121,51 @@ router.get("/subscriptiondata/:userId", async (req, res) => {
   //}
 //});
 
+// router.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     const db = await mysql.createConnection(dbConfig);
+//     const query = `SELECT * FROM users WHERE email = ?`;
+//     const [results]: [any[], any] = await db.query(query, [email]);
+
+//     // await db.end();
+
+//     if (results.length > 0) {
+//       const user = results[0];
+//       console.log("User found:", user);
+//       const passwordMatch = await bcrypt.compare(password, user.password);
+
+//       if (passwordMatch) {
+//         console.log("Password match:", passwordMatch);
+//         (req.session as CustomSession).isLoggedIn = true;
+//         (req.session as CustomSession).userId = user._id;
+//         console.log(user);
+//         res.status(200).json({
+//           message: "Login successful",
+//           user: user._id,
+//           sessionId: req.sessionID,
+//         });
+//       } else {
+//         console.log("Invalid password");
+//         res.status(401).json({ message: "Invalid email or password" });
+//       }
+//     } else {
+//       console.log("User not found");
+//       res.status(401).json({ message: "Invalid email or password" });
+//     }
+//   } catch (error) {
+//     console.error("Error during login:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const db = await mysql.createConnection(dbConfig);
-    const query = `SELECT * FROM users WHERE email = ?`;
+    const query = `SELECT * FROM users WHERE email =?`;
     const [results]: [any[], any] = await db.query(query, [email]);
-
-    // await db.end();
 
     if (results.length > 0) {
       const user = results[0];
@@ -148,17 +184,21 @@ router.post("/login", async (req, res) => {
         });
       } else {
         console.log("Invalid password");
+        // Uppdatera detta med detaljerad felinformation
         res.status(401).json({ message: "Invalid email or password" });
       }
     } else {
       console.log("User not found");
-      res.status(401).json({ message: "Invalid email or password" });
+      // Uppdatera detta med detaljerad felinformation
+      res.status(401).json({ message: "Invalid email or password"});
     }
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).send("Internal Server Error");
+    // Hantera generella fel med detaljerad information
+    res.status(500).json({ message: "Internal Server Error"});
   }
 });
+
 
 router.get("/check-session", (req, res) => {
   console.log("check-session route hit");

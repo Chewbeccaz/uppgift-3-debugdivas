@@ -4,7 +4,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-
+/* 
 nav {
   background-color: #333;
   padding: 10px 20px;
@@ -45,6 +45,78 @@ nav ul li a svg {
   }
 
   nav ul li {
+    margin: 10px 0;
+  }
+} */
+
+nav {
+  background-color: #272626;
+  padding: 16px 10px;
+  opacity: 0.8;
+}
+
+/* Container for nav elements */
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Left-aligned elements */
+.nav-left {
+  display: flex;
+  list-style: none;
+}
+
+/* Right-aligned elements */
+.nav-right {
+  display: flex;
+  list-style: none;
+}
+
+/* List items styling */
+.nav-left li,
+.nav-right li {
+  margin: 0 15px;
+}
+
+/* Links styling */
+.nav-left li a,
+.nav-right li a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Hover effect */
+.nav-left li a:hover,
+.nav-right li a:hover {
+  color: rgba(255, 255, 255, 0.684);
+}
+
+/* Adjust icon margin */
+.nav-left li a svg,
+.nav-right li a svg {
+  margin-right: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .nav-container {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .nav-left,
+  .nav-right {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .nav-left li,
+  .nav-right li {
     margin: 10px 0;
   }
 }

@@ -27,8 +27,7 @@ export const Navigation = () => {
         console.error("Logout failed:", Error);
       }
     } else {
-      // window.location.href = "/login";
-      // setShowDropdown(!showDropdown);
+
       setShowDropdown((prev) => !prev);
     }
   };

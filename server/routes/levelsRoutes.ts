@@ -8,9 +8,8 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const db = await mysql.createConnection(dbConfig);
-    const query = `SELECT _id, name FROM subscription_level`;
+    const query = `SELECT _id, name FROM subscription_level WHERE _id IN (2, 3, 4)`;
     const [results]: [any[], any] = await db.query(query);
-    // await db.end();
 
     res.status(200).json(results);
   } catch (error) {

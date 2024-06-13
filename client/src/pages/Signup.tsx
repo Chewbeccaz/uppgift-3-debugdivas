@@ -5,6 +5,7 @@ import Modal from "../components/modal/Modal";
 import PrivacyPolicy from "../components/modal/PrivacyPolicy";
 import "../styles/signup.css";
 
+
 export const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +15,9 @@ export const Signup = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [accountCreated, setAccountCreated] = useState(false);
+
+  
 
   useEffect(() => {
     const fetchSubscriptions = async () => {
@@ -31,6 +35,11 @@ export const Signup = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (accountCreated) {
+      alert("Kontot har redan skapats. Gå vidare till betalning.");
+      return;
+    }
+
     if (!isChecked) {
       alert("Du måste acceptera villkoren för att skapa ett konto.");
       return;
@@ -45,8 +54,10 @@ export const Signup = () => {
 
       if (response.status === 201) {
         setMessage("Konto skapat!");
+
         const userId = response.data.userId;
         setUserId(userId);
+        setAccountCreated(true);
       } else {
         setMessage("Något gick fel, vänligen försök igen.");
       }
@@ -61,11 +72,36 @@ export const Signup = () => {
       alert("skapa ett konto först");
       return;
     }
+
+    // console.log(import.meta.env.VITE_BLUNDER_KEY);
+
+    // const getPriceId = (subscriptionId: number): string => {
+    //   switch (subscriptionId) {
+    //     case 2:
+    //       return import.meta.env.VITE_BLUNDER_KEY;
+    //     case 3:
+    //       return import.meta.env.VITE_ARIEL_KEY;
+    //     case 4:
+    //       return import.meta.env.VITE_TRITON_KEY;
+    //     default:
+    //       return "";
+    //   }
+    // };
+
+    // const priceId = getPriceId(subscriptionId);
+    // console.log(priceId);
+
+    // if (!priceId) {
+    //   alert("Ogiltigt prenumerations-ID.");
+    //   return;
+    // }
+
     try {
       const response = await axios.post(
         "/api/stripe/create-subscription-session",
         {
           userId: userId,
+          subscriptionId: subscriptionId
         }
       );
       const { url, session } = response.data;
@@ -82,25 +118,27 @@ export const Signup = () => {
       <div className="signup-container">
         <form onSubmit={handleSubmit}>
           <div className="input-container">
-          <label>
-            Email:
-            <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-          <br />
-          <label>
-            Lösenord:
-            <input
-              type="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
+            <label>
+              Email:
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={accountCreated}
+              />
+            </label>
+            <br />
+            <label>
+              Lösenord:
+              <input
+                type="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={accountCreated}
+              />
+            </label>
           </div>
           <br />
           <label>
@@ -109,6 +147,7 @@ export const Signup = () => {
               name="subscription_id"
               value={subscriptionId}
               onChange={(e) => setSubscriptionId(Number(e.target.value))}
+              disabled={accountCreated}
             >
               {subscriptions.map((subscription) => (
                 <option key={subscription._id} value={subscription._id}>
@@ -123,11 +162,19 @@ export const Signup = () => {
               type="checkbox"
               checked={isChecked}
               onChange={(e) => setIsChecked(e.target.checked)}
+              disabled={accountCreated}
             />
-              Jag accepterar villkoren
+            Jag accepterar villkoren
           </label>
           <br />
-          <button type="submit">Skapa konto</button>
+          {message && <p>{message}</p>}
+          {!accountCreated ? (
+            <button type="submit">Skapa konto</button>
+          ) : (
+            <button type="button" onClick={handleSubPayment}>
+              Gå vidare till betalning
+            </button>
+          )}
           <p id="modaltext">
             <br />
             Genom att klicka på 'Skapa konto' godkänner du lagring av dina
@@ -139,12 +186,10 @@ export const Signup = () => {
             </a>
             .
           </p>
-          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-            <PrivacyPolicy />
-          </Modal>
-          {message && <p>{message}</p>}
         </form>
-        <button onClick={handleSubPayment}>Testknappen</button>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <PrivacyPolicy />
+        </Modal>
       </div>
     </div>
   );

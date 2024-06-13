@@ -21,23 +21,23 @@
 .input-container {
   display: flex;
   flex-direction: column;
-  width: 300px; /* Ensures the input container takes full width */
-  max-width: 400px; /* Optional: limits the maximum width */
-  justify-content: center; /* Aligns input fields to the center */
+  width: 300px; 
+  max-width: 400px; 
+  justify-content: center; 
 }
 
 .input-container label {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Aligns label text to the left */
-  margin-bottom: 10px; /* Adds space between fields */
+  align-items: flex-start; 
+  margin-bottom: 10px; 
   width: 100%;
 }
 
 .input-container input,
 .input-container select {
-  width: 100%; /* Ensures input and select elements take full width */
-  padding: 8px; /* Adds padding for better readability */
-  margin-top: 5px; /* Adds space between label text and input field */
-  box-sizing: border-box; /* Ensures padding doesn't affect overall width */
+  width: 100%; 
+  padding: 8px; 
+  margin-top: 5px; 
+  box-sizing: border-box; 
 }

@@ -9,18 +9,6 @@ export const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { login } = useUser();
  
-  // const handleLogin = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   try {
-  //     await login(email, password);
-  //   } catch (error) {
-  //     console.error("Login failed:", error);
-  //     setErrorMessage("Incorrect email or password.");
-  //     console.log(errorMessage);
-  //   }
-  //   setEmail("");
-  //   setPassword("");
-  // };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,14 +17,14 @@ export const Login = () => {
     } catch (error) {
       console.error("Login failed:", error);
       if (axios.isAxiosError(error) && error.response) {
-        // Kontrollera om svaret innehåller felinformation
+
         const errorMessageFromServer = error.response.data.message || "An error occurred";
         setErrorMessage(errorMessageFromServer);
       } else {
-        // Generellt felhantering
-        setErrorMessage("Incorrect email or password.");
+
+        setErrorMessage("Fel användarnamn eller lösenord.");
       }
-      console.log(errorMessage); // Observera att detta kommer att logga felmeddelandet innan det har uppdaterats
+      console.log(errorMessage);
     }
     setEmail("");
     setPassword("");
@@ -59,7 +47,7 @@ export const Login = () => {
         </div>
         <div className="form-group">
           <label>
-            Password:
+            Lösenord:
             <input
               type="password"
               name="password"
@@ -69,7 +57,7 @@ export const Login = () => {
             />
           </label>
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">Logga in</button>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
       </form>
     </div>

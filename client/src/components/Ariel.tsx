@@ -25,7 +25,7 @@ export const Ariel = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>; //Kanske en kul spinner eller något?? :))
+    return <p>Loading...</p>;
   }
   if (error) {
     return <p>{error}</p>;

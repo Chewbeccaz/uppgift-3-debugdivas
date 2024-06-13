@@ -8,7 +8,7 @@ export const Blunder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  //Lägga funktionen i typ utils eller ska man göra ett context för article och en för user?
+
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -25,7 +25,7 @@ export const Blunder = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>; //Kanske en kul spinner eller något?? :))
+    return <p>Loading...</p>; 
   }
   if (error) {
     return <p>{error}</p>;

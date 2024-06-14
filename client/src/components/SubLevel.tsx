@@ -16,13 +16,14 @@ export const SubLevel = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const BLUNDER_KEY = import.meta.env.VITE_BLUNDER_KEY;
-  const ARIEL_KEY = import.meta.env.VITE_ARIEL_KEY;
-  const TRITON_KEY = import.meta.env.VITE_TRITON_KEY;
+  const BLUNDER_KEY = "price_1POE5gDwCLdIkrpmfxhpiEiF";
+  const ARIEL_KEY = "price_1POE61DwCLdIkrpmqtIuoO9v"
+  const TRITON_KEY = "price_1POE6KDwCLdIkrpmomK5l3YN"
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (user && user.userId) {
+    
         try {
           const response = await axios.get(
             `/api/users/subscriptiondata/${user.userId}`
@@ -40,7 +41,7 @@ export const SubLevel = () => {
 
   const handleUpgrade = async (newPriceId: string) => {
     if (!user) return;
-
+console.log(newPriceId)
     setLoading(true);
     try {
       const response = await axios.post("/api/stripe/upgrade-subscription", {

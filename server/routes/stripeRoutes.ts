@@ -7,19 +7,19 @@ import dbConfig from "../db/config";
 import { initStripe } from "../stripe";
 import dotenv from "dotenv";
 dotenv.config();
-const { BLUNDER_KEY, ARIEL_KEY, TRITION_KEY } = process.env;
+const { BLUNDER_KEY, ARIEL_KEY, TRITON_KEY } = process.env;
 
 const router = Router();
 const stripe = initStripe();
 
-const getPriceId = (subscriptionId:Number) => {
+const getPriceId = (subscriptionId: Number) => {
   switch (subscriptionId) {
     case 2:
       return BLUNDER_KEY;
     case 3:
       return ARIEL_KEY;
     case 4:
-      return TRITION_KEY;
+      return TRITON_KEY;
     default:
       return "";
   }
@@ -172,14 +172,13 @@ router.post("/create-subscription-session", async (req, res) => {
     return;
   }
 
-
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       line_items: [
         {
-          price: priceId,  
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -277,7 +276,6 @@ router.get("/verify-subscription-session", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 router.post("/webhook", async (req, res) => {
   try {
@@ -462,7 +460,7 @@ router.post("/upgrade-subscription", async (req, res) => {
       customer: customerId,
     });
 
-    let subscriptionToUpdate;
+    let subscriptionToUpdate: any;
     for (let subscription of subscriptions.data) {
       if (
         subscription.items.data.some(
@@ -490,11 +488,27 @@ router.post("/upgrade-subscription", async (req, res) => {
       }
     );
 
+    // Mappning av pris-ID till nivåvärde
+    let levelValue;
+    switch (newPriceId) {
+      case process.env.BLUNDER_KEY:
+        levelValue = 2;
+        break;
+      case process.env.ARIEL_KEY:
+        levelValue = 3;
+        break;
+      case process.env.TRITON_KEY:
+        levelValue = 4;
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid price ID" });
+    }
+
     const db = await mysql.createConnection(dbConfig);
-    await db.query(
-      "UPDATE users SET subscription_id =? WHERE user_id =?",
-      [updatedSubscription.id, userId]
-    );
+    await db.query("UPDATE users SET subscription_id =? WHERE _id =?", [
+      levelValue,
+      userId,
+    ]);
 
     res.json({
       message: "Subscription upgraded successfully",
